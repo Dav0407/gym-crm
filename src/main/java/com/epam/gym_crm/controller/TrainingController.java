@@ -10,6 +10,12 @@ import com.epam.gym_crm.dto.response.TrainingTypeResponseDTO;
 import com.epam.gym_crm.service.TrainingService;
 import com.epam.gym_crm.service.TrainingTypeService;
 import com.epam.gym_crm.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,46 +31,97 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Tag(name = "Training API")
 @RestController
-@RequestMapping("/api/v1/trainings")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/trainings")
+@Tag(name = "Training API", description = "API endpoints for managing trainings and training types in the Gym CRM system")
 public class TrainingController {
 
     private final UserService userService;
     private final TrainingService trainingService;
     private final TrainingTypeService trainingTypeService;
 
+    @Operation(summary = "Add a new training", description = "Creates a new training session with the provided details.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Training created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainingResponseDTO> addTraining(@Valid @RequestBody AddTrainingRequestDTO request,
-                                                           @RequestHeader(value = "Username") String headerUsername,
-                                                           @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<TrainingResponseDTO> addTraining(@Valid @RequestBody
+                                                           @Parameter(description = "Details for creating a new training session", required = true)
+                                                           AddTrainingRequestDTO request,
+                                                           @RequestHeader(value = "Username")
+                                                           @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                           String headerUsername,
+                                                           @RequestHeader(value = "Password")
+                                                           @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                           String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TrainingResponseDTO response = trainingService.addTraining(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Get trainee trainings", description = "Retrieves a list of trainings for a specific trainee based on the provided criteria.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "302", description = "Trainee trainings found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TraineeTrainingResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Trainee not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
     @GetMapping(value = "/trainees", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TraineeTrainingResponseDTO>> getTraineeTrainings(@Valid @RequestBody GetTraineeTrainingsRequestDTO request,
-                                                                                @RequestHeader(value = "Username") String headerUsername,
-                                                                                @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<List<TraineeTrainingResponseDTO>> getTraineeTrainings(@Valid @RequestBody
+                                                                                @Parameter(description = "Criteria for retrieving trainee trainings (e.g., username, date range)", required = true)
+                                                                                GetTraineeTrainingsRequestDTO request,
+                                                                                @RequestHeader(value = "Username")
+                                                                                @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                                String headerUsername,
+                                                                                @RequestHeader(value = "Password")
+                                                                                @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                                String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         List<TraineeTrainingResponseDTO> response = trainingService.getTraineeTrainings(request);
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }
 
+    @Operation(summary = "Get trainer trainings", description = "Retrieves a list of trainings for a specific trainer based on the provided criteria.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "302", description = "Trainer trainings found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainerTrainingResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data", content = @Content),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Trainer not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
     @GetMapping(value = "/trainers", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TrainerTrainingResponseDTO>> getTrainerTrainings(@Valid @RequestBody GetTrainerTrainingsRequestDTO request,
-                                                                                @RequestHeader(value = "Username") String headerUsername,
-                                                                                @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<List<TrainerTrainingResponseDTO>> getTrainerTrainings(@Valid @RequestBody
+                                                                                @Parameter(description = "Criteria for retrieving trainer trainings (e.g., username, date range)", required = true)
+                                                                                GetTrainerTrainingsRequestDTO request,
+                                                                                @RequestHeader(value = "Username")
+                                                                                @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                                String headerUsername,
+                                                                                @RequestHeader(value = "Password")
+                                                                                @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                                String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         List<TrainerTrainingResponseDTO> response = trainingService.getTrainerTrainings(request);
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }
 
+    @Operation(summary = "Get all training types", description = "Retrieves a list of all available training types in the system.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "302", description = "Training types found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TrainingTypeResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
+    })
     @GetMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TrainingTypeResponseDTO>> getTrainingTypes(@RequestHeader(value = "Username") String headerUsername,
-                                                                          @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<List<TrainingTypeResponseDTO>> getTrainingTypes(@RequestHeader(value = "Username")
+                                                                          @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                          String headerUsername,
+                                                                          @RequestHeader(value = "Password")
+                                                                          @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                          String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         List<TrainingTypeResponseDTO> response = trainingTypeService.getAllTrainingTypes();
         return ResponseEntity.status(HttpStatus.FOUND).body(response);

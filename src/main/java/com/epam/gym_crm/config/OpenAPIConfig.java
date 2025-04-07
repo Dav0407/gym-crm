@@ -15,14 +15,26 @@ public class OpenAPIConfig {
 
     @Bean
     public OpenAPI myOpenAPI() {
-        Server devServer = new Server();
-        devServer.setUrl("http://localhost:8080");
-        devServer.setDescription("Development server");
+        Server devServer = new Server()
+                .url("http://localhost:8080")
+                .description("Development Server");
 
-        Contact contact = new Contact();
-        contact.setName("Gym CRM API");
-        contact.setEmail("support@gymcrm.com");
-        contact.setUrl("https://www.gymcrm.com");
+        Server localServer = new Server()
+                .url("http://localhost:9000")
+                .description("Local Server");
+
+        Server stagingServer = new Server()
+                .url("http://localhost:9090")
+                .description("Staging Server");
+
+        Server prodServer = new Server()
+                .url("http://localhost:8000")
+                .description("Production Server");
+
+        Contact contact = new Contact()
+                .name("Gym CRM API")
+                .email("support@gymcrm.com")
+                .url("https://www.gymcrm.com");
 
         License license = new License()
                 .name("Apache 2.0")
@@ -37,6 +49,6 @@ public class OpenAPIConfig {
 
         return new OpenAPI()
                 .info(info)
-                .servers(List.of(devServer));
+                .servers(List.of(devServer, localServer, stagingServer, prodServer));
     }
 }

@@ -7,6 +7,7 @@ import com.epam.gym_crm.dto.response.TraineeResponseDTO;
 import com.epam.gym_crm.service.TraineeService;
 import com.epam.gym_crm.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -45,7 +46,9 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TraineeResponseDTO> registerTrainee(@Valid @RequestBody CreateTraineeProfileRequestDTO request) {
+    public ResponseEntity<TraineeResponseDTO> registerTrainee(@Valid @RequestBody
+                                                              @Parameter(description = "Trainee profile creation details", required = true)
+                                                              CreateTraineeProfileRequestDTO request) {
         TraineeResponseDTO response = traineeService.createTraineeProfile(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -58,9 +61,15 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @GetMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TraineeProfileResponseDTO> getTraineeProfile(@PathVariable("username") @NotBlank(message = "Username is required") String username,
-                                                                       @RequestHeader(value = "Username") String headerUsername,
-                                                                       @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<TraineeProfileResponseDTO> getTraineeProfile(@PathVariable("username") @NotBlank(message = "Username is required")
+                                                                       @Parameter(description = "Username of the trainee to retrieve", required = true, example = "john.doe")
+                                                                       String username,
+                                                                       @RequestHeader(value = "Username")
+                                                                       @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                       String headerUsername,
+                                                                       @RequestHeader(value = "Password")
+                                                                       @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                       String headerPassword) {
 
         userService.validateCredentials(headerUsername, headerPassword);
         TraineeProfileResponseDTO response = traineeService.getTraineeByUsername(username);
@@ -76,9 +85,14 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TraineeProfileResponseDTO> updateTraineeProfile(@Valid @RequestBody UpdateTraineeProfileRequestDTO request,
-                                                                          @RequestHeader(value = "Username") String headerUsername,
-                                                                          @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<TraineeProfileResponseDTO> updateTraineeProfile(@Valid @RequestBody @Parameter(description = "Trainee profile update details", required = true)
+                                                                          UpdateTraineeProfileRequestDTO request,
+                                                                          @RequestHeader(value = "Username")
+                                                                          @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                          String headerUsername,
+                                                                          @RequestHeader(value = "Password")
+                                                                          @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                          String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TraineeProfileResponseDTO response = traineeService.updateTraineeProfile(request);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
@@ -92,9 +106,15 @@ public class TraineeController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @DeleteMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TraineeProfileResponseDTO> deleteTraineeProfile(@PathVariable("username") @NotBlank(message = "Username is required") String username,
-                                                                          @RequestHeader(value = "Username") String headerUsername,
-                                                                          @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<TraineeProfileResponseDTO> deleteTraineeProfile(@PathVariable("username") @NotBlank(message = "Username is required")
+                                                                          @Parameter(description = "Username of the trainee to delete", required = true, example = "john.doe")
+                                                                          String username,
+                                                                          @RequestHeader(value = "Username")
+                                                                          @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                          String headerUsername,
+                                                                          @RequestHeader(value = "Password")
+                                                                          @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                          String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TraineeProfileResponseDTO response = traineeService.deleteTraineeProfileByUsername(username);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
@@ -102,20 +122,21 @@ public class TraineeController {
 
     @Operation(summary = "Switch trainee status", description = "Toggles the active status of a trainee profile.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "202", description = "Trainee status updated successfully",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TraineeProfileResponseDTO.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials",
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = "Trainee not found",
-                    content = @Content),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content)
+            @ApiResponse(responseCode = "202", description = "Trainee status updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TraineeProfileResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Trainee not found", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @PatchMapping(value = "/{trainee-username}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TraineeProfileResponseDTO> switchTraineeStatus(@PathVariable("trainee-username") @NotBlank(message = "Username is required") String traineeUsername,
-                                                                         @RequestHeader(value = "Username") String headerUsername,
-                                                                         @RequestHeader(value = "Password") String headerPassword) {
+    public ResponseEntity<TraineeProfileResponseDTO> switchTraineeStatus(@PathVariable("trainee-username") @NotBlank(message = "Username is required")
+                                                                         @Parameter(description = "Username of the trainee whose status will be toggled", required = true, example = "john.doe")
+                                                                         String traineeUsername,
+                                                                         @RequestHeader(value = "Username")
+                                                                         @Parameter(description = "Username for authentication", required = true, example = "admin")
+                                                                         String headerUsername,
+                                                                         @RequestHeader(value = "Password")
+                                                                         @Parameter(description = "Password for authentication", required = true, example = "password123")
+                                                                         String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         traineeService.updateStatus(traineeUsername);
         TraineeProfileResponseDTO response = traineeService.getTraineeByUsername(traineeUsername);

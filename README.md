@@ -48,7 +48,7 @@ cd gym-crm-api
     datasource:
       url: jdbc:postgresql://localhost:5432/gym_app
       username: postgres
-      password: <your-password>
+      password: 123
   ```
 
 ### 3. Install Dependencies

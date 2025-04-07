@@ -4,8 +4,8 @@ spring:
       on-profile: stg
   datasource:
     url: jdbc:postgresql://localhost:5432/gym_app
-    username: postgres
-    password: 123
+    username: staging_user
+    password: 3456@#$%^
     driver-class-name: org.postgresql.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:

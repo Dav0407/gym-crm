@@ -1,15 +1,11 @@
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/gym_app
-    username: postgres
-    password: 123
-    driver-class-name: org.postgresql.Driver
+  profiles:
+    active: dev
   jpa:
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
         hbm2ddl:
-          auto: create
+          auto: validate  # Safer default for production
       jakarta:
         persistence:
           sql-load-script-source: META-INF/import.sql

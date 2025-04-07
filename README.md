@@ -36,7 +36,7 @@ This application leverages Spring Data JPA for database interactions, PostgreSQL
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/gym-crm-api.git
+git clone https://github.com/Dav0407/gym-crm-api.git
 cd gym-crm-api
 ```
 

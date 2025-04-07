@@ -37,6 +37,7 @@ public class User {
     @Column(nullable = false, unique = true, updatable = false)
     private String username;
 
+    @ToString.Exclude
     @Column(nullable = false)
     private String password;
 

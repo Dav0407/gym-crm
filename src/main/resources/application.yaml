@@ -9,3 +9,16 @@ spring:
       jakarta:
         persistence:
           sql-load-script-source: META-INF/import.sql
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    prometheus:
+      access: unrestricted
+  prometheus:
+    metrics:
+      export:
+        enabled: true

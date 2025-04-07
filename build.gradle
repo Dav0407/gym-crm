@@ -54,6 +54,9 @@ dependencies {
     //Health monitor
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+    //Prometheus
+    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
     //Test
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

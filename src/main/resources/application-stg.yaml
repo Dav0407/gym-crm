@@ -22,4 +22,4 @@ spring:
         hbm2ddl:
           auto: validate  # Only validate schema for staging
 server:
-  port: 9090
+  port: 9099

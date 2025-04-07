@@ -49,7 +49,7 @@ public class TrainerServiceImpl implements TrainerService {
 
         Trainer savedTrainer = trainerRepository.save(trainer);
 
-        log.info("Trainer profile created successfully: {}", savedTrainer.toString());
+        log.info("Trainer profile created successfully: {}", savedTrainer);
         return getTrainerResponseDTO(trainer);
     }
 

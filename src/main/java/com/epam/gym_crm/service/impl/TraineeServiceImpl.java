@@ -43,7 +43,7 @@ public class TraineeServiceImpl implements TraineeService {
 
         Trainee savedTrainee = traineeRepository.save(trainee);
 
-        log.info("Trainee profile created successfully: {}", savedTrainee.toString());
+        log.info("Trainee profile created successfully: {}", savedTrainee);
         return getTraineeResponseDTO(savedTrainee);
     }
 

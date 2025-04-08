@@ -1,7 +1,3 @@
-Below is an updated version of the `README.md` file for your `Gym CRM API` application, modified to use Gradle (`build.gradle`) instead of Maven (`pom.xml`). The rest of the content remains consistent with your controllers and previous requirements, with adjustments to reflect Gradle-specific commands and dependency management.
-
----
-
 # Gym CRM API
 
 ## Overview

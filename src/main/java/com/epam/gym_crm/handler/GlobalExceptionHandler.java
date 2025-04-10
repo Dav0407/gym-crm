@@ -20,7 +20,6 @@ import java.util.Map;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.INTERNAL_ERROR;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.RESOURCE_NOT_FOUND;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.USER_NOT_FOUND;
-import static com.epam.gym_crm.handler.BusinessErrorCodes.USER_UNAUTHORIZED;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.VALIDATION_FAILED;
 
 @ControllerAdvice

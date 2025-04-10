@@ -186,8 +186,6 @@ class TraineeTrainerServiceImplTest {
         newTraineeTrainer2.setTrainee(trainee);
         newTraineeTrainer2.setTrainer(trainer2);
 
-        List<TraineeTrainer> newRelations = Arrays.asList(newTraineeTrainer1, newTraineeTrainer2);
-
         TrainerSecureResponseDTO trainerSecureResponseDTO2 = new TrainerSecureResponseDTO();
         trainerSecureResponseDTO2.setId(2L);
         trainerSecureResponseDTO2.setFirstName("TrainerFirst2");

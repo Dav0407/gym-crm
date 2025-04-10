@@ -22,7 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static com.epam.gym_crm.handler.BusinessErrorCodes.INTERNAL_ERROR;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.USER_NOT_FOUND;
-import static com.epam.gym_crm.handler.BusinessErrorCodes.USER_UNAUTHORIZED;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.VALIDATION_FAILED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

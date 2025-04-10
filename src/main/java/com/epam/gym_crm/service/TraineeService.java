@@ -14,6 +14,4 @@ public interface TraineeService extends UserCreationService{
     TraineeProfileResponseDTO updateTraineeProfile(UpdateTraineeProfileRequestDTO request);
     void updateStatus(String username);
     TraineeProfileResponseDTO deleteTraineeProfileByUsername(String username);
-    TraineeResponseDTO getTraineeResponseDTO(Trainee trainee);
-    boolean healthCheck();
 }

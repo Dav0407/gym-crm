@@ -34,16 +34,6 @@ public class TraineeTrainerServiceImpl implements TraineeTrainerService {
     public TraineeTrainer createTraineeTrainer(String traineeUsername, String trainerUsername) {
         log.info("Attempting to create a trainee-trainer relationship: Trainee = {}, Trainer = {}", traineeUsername, trainerUsername);
 
-        // Validate input
-        if (traineeUsername == null || traineeUsername.trim().isEmpty()) {
-            log.error("Trainee username is null or empty.");
-            throw new IllegalArgumentException("Trainee username cannot be empty.");
-        }
-        if (trainerUsername == null || trainerUsername.trim().isEmpty()) {
-            log.error("Trainer username is null or empty.");
-            throw new IllegalArgumentException("Trainer username cannot be empty.");
-        }
-
         // Retrieve trainee and trainer
         Trainee trainee = traineeService.getTraineeEntityByUsername(traineeUsername);
         Trainer trainer = trainerService.getTrainerEntityByUsername(trainerUsername);
@@ -76,14 +66,6 @@ public class TraineeTrainerServiceImpl implements TraineeTrainerService {
     @Override
     @Transactional
     public List<TrainerSecureResponseDTO> updateTraineeTrainers(UpdateTrainerListRequestDTO request) {
-        // Validate inputs
-        if (request.getTraineeUsername() == null || request.getTraineeUsername().isBlank()) {
-            throw new IllegalArgumentException("Trainee username cannot be null or empty.");
-        }
-
-        if (request.getTrainerUsernames() == null) {
-            throw new IllegalArgumentException("Trainer usernames list cannot be null.");
-        }
 
         log.info("Updating trainers list for trainee: {}", request.getTraineeUsername());
 

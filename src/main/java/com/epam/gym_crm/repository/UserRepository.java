@@ -11,15 +11,17 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+    @Transactional(readOnly = true)
     Optional<User> findByUsername(String username);
 
     void deleteByUsername(String username);
 
-    @Modifying
     @Transactional
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE User u SET u.isActive = CASE WHEN u.isActive = true THEN false ELSE true END WHERE u.username = :username")
     int toggleStatus(@Param("username") String username);
 
+    @Transactional
     @Modifying
     @Query("UPDATE User u SET u.password = :password WHERE u.username = :username")
     void updateUserPassword(@Param("username") String username, @Param("password") String password);

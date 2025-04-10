@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -154,7 +155,7 @@ public class TrainerController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @PatchMapping(value = "/{trainer-username}/status", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TrainerProfileResponseDTO> switchTraineeStatus(@PathVariable("trainer-username") @NotBlank(message = "Username is required")
+    public ResponseEntity<TrainerProfileResponseDTO> switchTrainerStatus(@PathVariable("trainer-username") @NotBlank(message = "Username is required")
                                                                          @Parameter(description = "Username of the trainer whose status will be toggled", required = true, example = "jane.smith")
                                                                          String trainerUsername,
                                                                          @RequestHeader(value = "Username")

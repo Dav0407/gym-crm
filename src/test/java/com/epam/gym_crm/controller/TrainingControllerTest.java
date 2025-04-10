@@ -122,7 +122,7 @@ public class TrainingControllerTest {
         when(userService.validateCredentials("trainee.user", "validPass")).thenReturn(user);
         when(trainingService.getTraineeTrainings(any(GetTraineeTrainingsRequestDTO.class))).thenReturn(trainings);
 
-        mockMvc.perform(get("/api/v1/trainings/trainees")
+        mockMvc.perform(post("/api/v1/trainings/trainees")
                         .header("Username", "trainee.user")
                         .header("Password", "validPass")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -162,7 +162,7 @@ public class TrainingControllerTest {
         when(userService.validateCredentials("trainer.user", "validPass")).thenReturn(user);
         when(trainingService.getTrainerTrainings(any(GetTrainerTrainingsRequestDTO.class))).thenReturn(trainings);
 
-        mockMvc.perform(get("/api/v1/trainings/trainers")
+        mockMvc.perform(post("/api/v1/trainings/trainers")
                         .header("Username", "trainer.user")
                         .header("Password", "validPass")
                         .contentType(MediaType.APPLICATION_JSON)

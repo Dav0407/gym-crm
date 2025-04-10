@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -36,8 +35,6 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public TrainerResponseDTO createTrainerProfile(CreateTrainerProfileRequestDTO request) {
         log.info("Creating new trainer profile for: {} {}", request.getFirstName(), request.getLastName());
-
-        validateRequest(request);
 
         User user = createUser(request.getFirstName(), request.getLastName());
 
@@ -116,14 +113,7 @@ public class TrainerServiceImpl implements TrainerService {
     public List<TrainerSecureResponseDTO> getNotAssignedTrainersByTraineeUsername(String traineeUsername) {
         log.info("Fetching unassigned trainers for trainee: {}", traineeUsername);
 
-        // Validate input
-        if (!StringUtils.hasText(traineeUsername)) {
-            log.warn("Trainee username is null or empty.");
-            throw new IllegalArgumentException("Trainee username must not be empty");
-        }
-
         try {
-
             List<TrainerSecureResponseDTO> unassignedTrainers = trainerRepository.findUnassignedTrainersByTraineeUsername(traineeUsername)
                     .stream()
                     .map(trainerMapper::toTrainerSecureResponseDTO)
@@ -135,15 +125,6 @@ public class TrainerServiceImpl implements TrainerService {
         } catch (Exception e) {
             log.error("Error while fetching unassigned trainers for trainee: {}", traineeUsername, e);
             throw new RuntimeException("Failed to retrieve unassigned trainers", e);
-        }
-    }
-
-    private void validateRequest(CreateTrainerProfileRequestDTO request) {
-        if (!StringUtils.hasText(request.getFirstName()) || !StringUtils.hasText(request.getLastName())) {
-            throw new IllegalArgumentException("First name and last name cannot be empty");
-        }
-        if (!StringUtils.hasText(request.getTrainingType())) {
-            throw new IllegalArgumentException("Training type cannot be empty");
         }
     }
 

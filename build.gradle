@@ -31,35 +31,38 @@ ext{
 dependencies {
 
     //Spring-Web
-    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
     //Documentation
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: springDocVersion
 
     //Validator
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
 
     //Lombok
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    compileOnly group: 'org.projectlombok', name: 'lombok'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok'
 
     // MapStruct
     implementation group: 'org.mapstruct', name: 'mapstruct', version: mapstructVersion
     annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: mapstructVersion
 
     //Database
-    runtimeOnly 'org.postgresql:postgresql'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly group: 'org.postgresql', name: 'postgresql'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
 
     //Health monitor
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
+
+    //AOP
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
 
     //Prometheus
-    runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+    runtimeOnly group: 'io.micrometer', name: 'micrometer-registry-prometheus'
 
     //Test
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
 }
 
 tasks.named('test') {

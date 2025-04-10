@@ -18,10 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -59,26 +57,6 @@ public class UserServiceImplTest {
         assertNotNull(savedUser);
         assertEquals("john.doe", savedUser.getUsername());
         verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    void testCheckUsernameExists() {
-        when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
-
-        boolean exists = userService.checkUsernameExists("john.doe");
-
-        assertTrue(exists);
-        verify(userRepository, times(1)).findByUsername("john.doe");
-    }
-
-    @Test
-    void testCheckUsernameDoesNotExist() {
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
-
-        boolean exists = userService.checkUsernameExists("nonexistent");
-
-        assertFalse(exists);
-        verify(userRepository, times(1)).findByUsername("nonexistent");
     }
 
     @Test

@@ -259,11 +259,4 @@ public class TrainerServiceImplTest {
         verify(trainerRepository, times(1)).findUnassignedTrainersByTraineeUsername("trainee1");
         verify(trainerMapper, times(1)).toTrainerSecureResponseDTO(trainer);
     }
-
-    @Test
-    void testGetNotAssignedTrainersByTraineeUsernameWithEmptyUsername() {
-        assertThrows(IllegalArgumentException.class, () -> trainerService.getNotAssignedTrainersByTraineeUsername(""));
-
-        verify(trainerRepository, never()).findUnassignedTrainersByTraineeUsername(anyString());
-    }
 }

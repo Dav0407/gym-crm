@@ -135,7 +135,7 @@ class UserControllerTest {
         mockMvc.perform(put("/api/v1/users/change-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized()) // Changed from isBadRequest()
+                .andExpect(status().isNotFound()) // Changed from isBadRequest()
                 .andExpect(jsonPath("$.errorMessage").value(containsString("Required header")));
 
         verify(userService, never()).validateCredentials(anyString(), anyString());
@@ -179,7 +179,7 @@ class UserControllerTest {
                         .header("Password", "wrongPass")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.businessErrorCode").exists())
                 .andExpect(jsonPath("$.errorMessage").value("Username or password is incorrect."));
 

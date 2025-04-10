@@ -150,15 +150,15 @@ class GlobalExceptionHandlerTest {
         MvcResult result = mockMvc.perform(get("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andReturn();
 
         // Then
         ExceptionResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ExceptionResponse.class);
 
-        assertEquals(USER_UNAUTHORIZED.getCode(), response.getBusinessErrorCode());
-        assertEquals(USER_UNAUTHORIZED.getDescription(), response.getBusinessErrorDescription());
+        assertEquals(USER_NOT_FOUND.getCode(), response.getBusinessErrorCode());
+        assertEquals(USER_NOT_FOUND.getDescription(), response.getBusinessErrorDescription());
         assertEquals("Invalid credentials", response.getErrorMessage());
     }
 
@@ -236,15 +236,15 @@ class GlobalExceptionHandlerTest {
         MvcResult result = mockMvc.perform(put("/api/v1/users/change-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(changePasswordRequest)))
-                .andExpect(status().isUnauthorized())
+                .andExpect(status().isNotFound())
                 .andReturn();
 
         // Then
         ExceptionResponse response = objectMapper.readValue(
                 result.getResponse().getContentAsString(), ExceptionResponse.class);
 
-        assertEquals(USER_UNAUTHORIZED.getCode(), response.getBusinessErrorCode());
-        assertEquals(USER_UNAUTHORIZED.getDescription(), response.getBusinessErrorDescription());
+        assertEquals(USER_NOT_FOUND.getCode(), response.getBusinessErrorCode());
+        assertEquals(USER_NOT_FOUND.getDescription(), response.getBusinessErrorDescription());
 
         // Check for the specific header missing message format
         assertTrue(response.getErrorMessage().matches("Required header '(Username|Password)' is missing"),

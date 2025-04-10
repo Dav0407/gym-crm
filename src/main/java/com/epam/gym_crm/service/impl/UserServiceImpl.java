@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.security.SecureRandom;
 import java.util.stream.Collectors;
@@ -35,14 +34,6 @@ public class UserServiceImpl implements UserService {
     public User saveUser(User user) {
         log.info("Saving user: {}", user.getUsername());
         return userRepository.save(user);
-    }
-
-    @Transactional
-    @Override
-    public boolean checkUsernameExists(String username) {
-        boolean exists = userRepository.findByUsername(username).isPresent();
-        log.info("Checking if username exists ({}): {}", username, exists);
-        return exists;
     }
 
     @Override
@@ -81,12 +72,8 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDTO(user);
     }
 
-    @Transactional
     @Override
     public String generateUsername(String firstName, String lastName) {
-        if (!StringUtils.hasText(firstName) || !StringUtils.hasText(lastName)) {
-            throw new IllegalArgumentException("First name and last name cannot be empty.");
-        }
 
         log.info("Generating username for: {} {}", firstName, lastName);
 
@@ -115,6 +102,7 @@ public class UserServiceImpl implements UserService {
         return password;
     }
 
+    @Transactional
     @Override
     public void updateStatus(String username) {
         try {
@@ -134,6 +122,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String username) {
+
         userRepository.findByUsername(username).ifPresentOrElse(user -> {
             userRepository.deleteByUsername(username);
             log.info("User deleted successfully: {}", username);
@@ -143,10 +132,9 @@ public class UserServiceImpl implements UserService {
         });
     }
 
-
     @Override
     public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found."));
+        return userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("User not found."));
     }
 
     @Override
@@ -157,5 +145,10 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponseDTO(user);
     }
 
+    private boolean checkUsernameExists(String username) {
+        boolean exists = userRepository.findByUsername(username).isPresent();
+        log.info("Checking if username exists ({}): {}", username, exists);
+        return exists;
+    }
 
 }

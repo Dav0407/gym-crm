@@ -12,8 +12,6 @@ public interface UserService {
 
     User saveUser(User user);
 
-    boolean checkUsernameExists(String username);
-
     User validateCredentials(String username, String password);
 
     UserResponseDTO changePassword(ChangePasswordRequestDTO request);

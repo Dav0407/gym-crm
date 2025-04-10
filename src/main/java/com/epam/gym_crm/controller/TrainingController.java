@@ -71,7 +71,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "404", description = "Trainee not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
-    @GetMapping(value = "/trainees", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/trainees", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TraineeTrainingResponseDTO>> getTraineeTrainings(@Valid @RequestBody
                                                                                 @Parameter(description = "Criteria for retrieving trainee trainings (e.g., username, date range)", required = true)
                                                                                 GetTraineeTrainingsRequestDTO request,
@@ -94,7 +94,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "404", description = "Trainer not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
-    @GetMapping(value = "/trainers", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/trainers", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TrainerTrainingResponseDTO>> getTrainerTrainings(@Valid @RequestBody
                                                                                 @Parameter(description = "Criteria for retrieving trainer trainings (e.g., username, date range)", required = true)
                                                                                 GetTrainerTrainingsRequestDTO request,

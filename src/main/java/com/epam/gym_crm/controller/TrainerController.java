@@ -77,7 +77,7 @@ public class TrainerController {
                                                                        String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TrainerProfileResponseDTO response = trainerService.getTrainerByUsername(username);
-        return ResponseEntity.status(HttpStatus.FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Update trainer profile", description = "Updates an existing trainer profile with the provided details.")
@@ -99,7 +99,7 @@ public class TrainerController {
                                                                           String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TrainerProfileResponseDTO response = trainerService.updateTrainerProfile(request);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Get unassigned trainers", description = "Retrieves a list of trainers not assigned to a specific trainee.")
@@ -121,7 +121,7 @@ public class TrainerController {
                                                                                  String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         List<TrainerSecureResponseDTO> response = trainerService.getNotAssignedTrainersByTraineeUsername(username);
-        return ResponseEntity.status(HttpStatus.FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Update trainee's trainer list", description = "Updates the list of trainers assigned to a trainee.")
@@ -143,7 +143,7 @@ public class TrainerController {
                                                                                      String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         List<TrainerSecureResponseDTO> response = traineeTrainerService.updateTraineeTrainers(request);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Switch trainer status", description = "Toggles the active status of a trainer profile.")
@@ -166,6 +166,6 @@ public class TrainerController {
         userService.validateCredentials(headerUsername, headerPassword);
         trainerService.updateStatus(trainerUsername);
         TrainerProfileResponseDTO response = trainerService.getTrainerByUsername(trainerUsername);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

@@ -102,7 +102,7 @@ public class TrainerControllerTest {
         mockMvc.perform(get("/api/v1/trainers/{username}", username)
                         .header("Username", username)
                         .header("Password", "validPass"))
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"))
                 .andExpect(jsonPath("$.isActive").value(true));
@@ -137,7 +137,7 @@ public class TrainerControllerTest {
                         .header("Password", "validPass")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John Updated"))
                 .andExpect(jsonPath("$.lastName").value("Doe Updated"))
                 .andExpect(jsonPath("$.isActive").value(true));
@@ -171,7 +171,7 @@ public class TrainerControllerTest {
         mockMvc.perform(get("/api/v1/trainers/not-assigned/{username}", traineeUsername)
                         .header("Username", traineeUsername)
                         .header("Password", "validPass"))
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].username").value("trainer1"))
                 .andExpect(jsonPath("$[1].username").value("trainer2"));
     }
@@ -219,7 +219,7 @@ public class TrainerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print()) // Add this to print the response for debugging
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].username").value("trainer1"))
                 .andExpect(jsonPath("$[0].firstName").value("Trainer"))
                 .andExpect(jsonPath("$[0].lastName").value("One"))
@@ -252,7 +252,7 @@ public class TrainerControllerTest {
         mockMvc.perform(patch("/api/v1/trainers/{trainer-username}/status", username)
                         .header("Username", username)
                         .header("Password", "validPass"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isActive").value(false));
     }
 }

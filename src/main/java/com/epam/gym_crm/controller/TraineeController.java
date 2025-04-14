@@ -73,7 +73,7 @@ public class TraineeController {
 
         userService.validateCredentials(headerUsername, headerPassword);
         TraineeProfileResponseDTO response = traineeService.getTraineeByUsername(username);
-        return ResponseEntity.status(HttpStatus.FOUND).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Update trainee profile", description = "Updates an existing trainee profile with the provided details.")
@@ -95,12 +95,12 @@ public class TraineeController {
                                                                           String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TraineeProfileResponseDTO response = traineeService.updateTraineeProfile(request);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @Operation(summary = "Delete trainee profile", description = "Deletes a trainee profile by their username.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "202", description = "Trainee profile deleted successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TraineeProfileResponseDTO.class))),
+            @ApiResponse(responseCode = "204", description = "Trainee profile deleted successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = TraineeProfileResponseDTO.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials", content = @Content),
             @ApiResponse(responseCode = "404", description = "Trainee not found", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
@@ -117,7 +117,7 @@ public class TraineeController {
                                                                           String headerPassword) {
         userService.validateCredentials(headerUsername, headerPassword);
         TraineeProfileResponseDTO response = traineeService.deleteTraineeProfileByUsername(username);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 
     @Operation(summary = "Switch trainee status", description = "Toggles the active status of a trainee profile.")
@@ -140,7 +140,7 @@ public class TraineeController {
         userService.validateCredentials(headerUsername, headerPassword);
         traineeService.updateStatus(traineeUsername);
         TraineeProfileResponseDTO response = traineeService.getTraineeByUsername(traineeUsername);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
 

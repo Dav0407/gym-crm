@@ -91,7 +91,7 @@ public class TraineeControllerTest {
         mockMvc.perform(get("/api/v1/trainees/{username}", username)
                         .header("Username", username)
                         .header("Password", "validPass"))
-                .andExpect(status().isFound())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"));
     }
@@ -132,7 +132,7 @@ public class TraineeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())  // Keep this for debugging
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("john.doe"))
                 .andExpect(jsonPath("$.firstName").value("John Updated"))
                 .andExpect(jsonPath("$.lastName").value("Doe Updated"))
@@ -156,7 +156,7 @@ public class TraineeControllerTest {
         mockMvc.perform(delete("/api/v1/trainees/{username}", username)
                         .header("Username", username)
                         .header("Password", "validPass"))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"));
     }
@@ -189,7 +189,7 @@ public class TraineeControllerTest {
                         .header("Username", username)
                         .header("Password", "validPass"))
                 .andDo(print())  // Keep for debugging
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.isActive").exists())  // Check field exists
                 .andExpect(jsonPath("$.isActive").isBoolean())  // Verify type
                 .andExpect(jsonPath("$.isActive").value(false));  // Verify value

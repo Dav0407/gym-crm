@@ -25,45 +25,53 @@ repositories {
 ext{
     mapstructVersion = '1.5.5.Final'
     springDocVersion = '2.8.6'
+    jjwtVersion = '0.12.6'
 }
 
 dependencies {
 
-    //Gave null for version, Spring boot will manage the spring-boot-starter dependency versions by itself
-
     //Spring-Web
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: null
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
+
+    //Spring-Security
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+
+    //JWT
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: jjwtVersion
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-impl', version: jjwtVersion
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: jjwtVersion
 
     //Documentation
     implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: springDocVersion
 
     //Validator
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: null
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
 
     //Lombok
-    compileOnly group: 'org.projectlombok', name: 'lombok', version: null
-    annotationProcessor group: 'org.projectlombok', name: 'lombok', version: null
+    compileOnly group: 'org.projectlombok', name: 'lombok'
+    annotationProcessor group: 'org.projectlombok', name: 'lombok'
 
     // MapStruct
     implementation group: 'org.mapstruct', name: 'mapstruct', version: mapstructVersion
     annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: mapstructVersion
 
     //Database
-    runtimeOnly group: 'org.postgresql', name: 'postgresql', version: null
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: null
+    runtimeOnly group: 'org.postgresql', name: 'postgresql'
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
 
     //Health monitor
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator', version: null
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
 
     //AOP
-    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop', version: null
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
 
     //Prometheus
-    runtimeOnly group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: null
+    runtimeOnly group: 'io.micrometer', name: 'micrometer-registry-prometheus'
 
     //Test
-    testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher', version: null
-    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: null
+    testImplementation group: 'org.springframework.security', name: 'spring-security-test'
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'
+    testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
 }
 
 tasks.named('test') {

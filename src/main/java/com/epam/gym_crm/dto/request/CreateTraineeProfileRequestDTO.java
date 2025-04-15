@@ -2,6 +2,7 @@ package com.epam.gym_crm.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class CreateTraineeProfileRequestDTO implements Serializable {
     private String lastName;
 
     @JsonProperty("dateOfBirth")
+    @Past(message = "dateOfBirth can not be in future")
     private Date dateOfBirth;
 
     @JsonProperty("address")

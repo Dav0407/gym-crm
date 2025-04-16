@@ -27,6 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -91,6 +93,9 @@ public class TrainingControllerTest {
 
     @Test
     void getTraineeTrainings_ShouldReturnList() throws Exception {
+
+        doNothing().when(traineeService).checkOwnership(anyString());
+
         GetTraineeTrainingsRequestDTO request = GetTraineeTrainingsRequestDTO.builder()
                 .traineeUsername("trainee.user")
                 .from(dateFormat.parse("2023-01-01"))
@@ -128,6 +133,9 @@ public class TrainingControllerTest {
 
     @Test
     void getTrainerTrainings_ShouldReturnList() throws Exception {
+
+        doNothing().when(trainerService).checkOwnership(anyString());
+
         GetTrainerTrainingsRequestDTO request = GetTrainerTrainingsRequestDTO.builder()
                 .trainerUsername("trainer.user")
                 .from(dateFormat.parse("2023-01-01"))

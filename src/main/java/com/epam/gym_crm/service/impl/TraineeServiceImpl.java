@@ -9,6 +9,7 @@ import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.exception.UserNotFoundException;
 import com.epam.gym_crm.mapper.TraineeMapper;
 import com.epam.gym_crm.repository.TraineeRepository;
+import com.epam.gym_crm.service.JwtService;
 import com.epam.gym_crm.service.TraineeService;
 import com.epam.gym_crm.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class TraineeServiceImpl implements TraineeService {
 
+    private final JwtService jwtService;
     private final TraineeRepository traineeRepository;
     private final TraineeMapper traineeMapper;
     private final UserService userService;
@@ -41,7 +43,11 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee savedTrainee = traineeRepository.save(trainee);
 
         log.info("Trainee profile created successfully: {}", savedTrainee);
-        return getTraineeResponseDTO(savedTrainee);
+
+
+        TraineeResponseDTO response = getTraineeResponseDTO(savedTrainee);
+
+        return addTokensToDTO(savedTrainee, response);
     }
 
     @Override
@@ -108,5 +114,19 @@ public class TraineeServiceImpl implements TraineeService {
 
     private TraineeResponseDTO getTraineeResponseDTO(Trainee trainee) {
         return traineeMapper.toTraineeResponseDTO(trainee);
+    }
+
+    private TraineeResponseDTO addTokensToDTO(Trainee trainee, TraineeResponseDTO response) {
+
+        String accessToken = jwtService.generateAccessToken(trainee.getUser());
+        log.info("Access token generated successfully");
+
+        String refreshToken = jwtService.generateRefreshToken(trainee.getUser());
+        log.info("Refresh token generated successfully");
+
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+
+        return response;
     }
 }

@@ -11,6 +11,7 @@ import com.epam.gym_crm.exception.ResourceNotFoundException;
 import com.epam.gym_crm.exception.UserNotFoundException;
 import com.epam.gym_crm.mapper.TrainerMapper;
 import com.epam.gym_crm.repository.TrainerRepository;
+import com.epam.gym_crm.service.JwtService;
 import com.epam.gym_crm.service.TrainerService;
 import com.epam.gym_crm.service.TrainingTypeService;
 import com.epam.gym_crm.service.UserService;
@@ -26,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TrainerServiceImpl implements TrainerService {
 
+    private final JwtService jwtService;
     private final TrainingTypeService trainingTypeService;
     private final TrainerRepository trainerRepository;
     private final TrainerMapper trainerMapper;
@@ -47,7 +49,9 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer savedTrainer = trainerRepository.save(trainer);
 
         log.info("Trainer profile created successfully: {}", savedTrainer);
-        return getTrainerResponseDTO(trainer);
+        TrainerResponseDTO response = getTrainerResponseDTO(trainer);
+
+        return addTokensToDTO(savedTrainer, response);
     }
 
     @Override
@@ -136,5 +140,18 @@ public class TrainerServiceImpl implements TrainerService {
     @Override
     public UserService getUserService() {
         return userService;
+    }
+
+    private TrainerResponseDTO addTokensToDTO(Trainer trainer, TrainerResponseDTO response) {
+        String accessToken = jwtService.generateAccessToken(trainer.getUser());
+        log.info("Access token generated successfully");
+
+        String refreshToken = jwtService.generateRefreshToken(trainer.getUser());
+        log.info("Refresh token generated successfully");
+
+        response.setAccessToken(accessToken);
+        response.setRefreshToken(refreshToken);
+
+        return response;
     }
 }

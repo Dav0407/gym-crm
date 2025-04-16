@@ -21,4 +21,6 @@ public class TrainerResponseDTO {
     private String password;
     private Boolean isActive;
     private String  specialization;
+    private String accessToken;
+    private String refreshToken;
 }

@@ -27,4 +27,7 @@ public class TraineeResponseDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date birthDate;
     private String address;
+
+    private String accessToken;
+    private String refreshToken;
 }

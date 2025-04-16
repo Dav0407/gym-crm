@@ -1,6 +1,6 @@
 package com.epam.gym_crm.handler;
 
-import com.epam.gym_crm.dto.response.ExceptionResponse;
+import com.epam.gym_crm.dto.response.ExceptionResponseDTO;
 import com.epam.gym_crm.exception.InvalidPasswordException;
 import com.epam.gym_crm.exception.InvalidUserCredentialException;
 import com.epam.gym_crm.exception.ResourceNotFoundException;
@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -28,7 +27,7 @@ public class GlobalExceptionHandler {
     private static final Log LOG = LogFactory.getLog(GlobalExceptionHandler.class);
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleValidationExceptions(MethodArgumentNotValidException exception) {
         LOG.error("MethodArgumentNotValidException: ", exception);
 
         Map<String, String> errors = new HashMap<>();
@@ -44,7 +43,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleResourceNotFoundException(ResourceNotFoundException exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleResourceNotFoundException(ResourceNotFoundException exception) {
         LOG.error("ResourceNotFoundException: ", exception);
 
         return createExceptionResponse(
@@ -55,7 +54,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidUserCredentialException.class)
-    public ResponseEntity<ExceptionResponse> handleInvalidUserCredentialException(InvalidUserCredentialException exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleInvalidUserCredentialException(InvalidUserCredentialException exception) {
         LOG.error("InvalidUserCredentialException: ", exception);
 
         return createExceptionResponse(
@@ -66,7 +65,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<ExceptionResponse> handleInvalidPasswordException(InvalidPasswordException exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleInvalidPasswordException(InvalidPasswordException exception) {
         LOG.error("InvalidPasswordException: ", exception);
 
         return createExceptionResponse(
@@ -77,7 +76,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleUserNotFoundException(UserNotFoundException exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleUserNotFoundException(UserNotFoundException exception) {
         LOG.error("UserNotFoundException: ", exception);
 
         return createExceptionResponse(
@@ -88,7 +87,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<ExceptionResponse> handleEntityNotFoundException(EntityNotFoundException exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleEntityNotFoundException(EntityNotFoundException exception) {
         LOG.error("EntityNotFoundException: ", exception);
 
         return createExceptionResponse(
@@ -98,21 +97,8 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(MissingRequestHeaderException.class)
-    public ResponseEntity<ExceptionResponse> handleMissingRequestHeaderException(MissingRequestHeaderException exception) {
-        LOG.error("MissingRequestHeaderException: ", exception);
-
-        String errorMessage = String.format("Required header '%s' is missing", exception.getHeaderName());
-
-        return createExceptionResponse(
-                USER_NOT_FOUND,
-                errorMessage,
-                null
-        );
-    }
-
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ExceptionResponse> handleException(Exception exception) {
+    public ResponseEntity<ExceptionResponseDTO> handleException(Exception exception) {
         LOG.error("An exception occurred: ", exception);
 
         return createExceptionResponse(
@@ -128,14 +114,14 @@ public class GlobalExceptionHandler {
      * @param errorCode         The business error code enum value
      * @param errorMessage      Error message
      * @param validationErrors  Optional map of field validation errors
-     * @return ResponseEntity with constructed ExceptionResponse
+     * @return ResponseEntity with constructed ExceptionResponseDTO
      */
-    private ResponseEntity<ExceptionResponse> createExceptionResponse(
+    private ResponseEntity<ExceptionResponseDTO> createExceptionResponse(
             BusinessErrorCodes errorCode,
             String errorMessage,
             Map<String, String> validationErrors) {
 
-        ExceptionResponse.ExceptionResponseBuilder responseBuilder = ExceptionResponse.builder()
+        ExceptionResponseDTO.ExceptionResponseDTOBuilder responseBuilder = ExceptionResponseDTO.builder()
                 .businessErrorCode(errorCode.getCode())
                 .businessErrorDescription(errorCode.getDescription())
                 .errorMessage(errorMessage);

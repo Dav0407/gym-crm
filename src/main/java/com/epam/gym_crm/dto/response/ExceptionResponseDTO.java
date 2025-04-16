@@ -17,7 +17,7 @@ import java.util.Map;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString
-public class ExceptionResponse {
+public class ExceptionResponseDTO {
 
     private Integer businessErrorCode;
     private String businessErrorDescription;

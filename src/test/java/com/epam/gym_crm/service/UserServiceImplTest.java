@@ -1,33 +1,49 @@
 package com.epam.gym_crm.service;
 
 import com.epam.gym_crm.dto.request.ChangePasswordRequestDTO;
+import com.epam.gym_crm.dto.request.LogInRequestDTO;
+import com.epam.gym_crm.dto.response.AuthenticationResponseDTO;
 import com.epam.gym_crm.dto.response.UserResponseDTO;
 import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.exception.InvalidPasswordException;
-import com.epam.gym_crm.exception.InvalidUserCredentialException;
+import com.epam.gym_crm.exception.UserNotFoundException;
 import com.epam.gym_crm.mapper.UserMapper;
 import com.epam.gym_crm.repository.UserRepository;
 import com.epam.gym_crm.service.impl.UserServiceImpl;
+import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
+
+    @Mock
+    private JwtService jwtService;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
 
     @Mock
     private UserRepository userRepository;
@@ -39,152 +55,181 @@ public class UserServiceImplTest {
     private UserServiceImpl userService;
 
     private User user;
+    private UserResponseDTO userResponseDTO;
 
     @BeforeEach
     void setUp() {
         user = new User();
         user.setUsername("john.doe");
-        user.setPassword("password123");
-        user.setIsActive(true);
+        user.setPassword("encodedPassword");
+
+        userResponseDTO = UserResponseDTO.builder()
+                .username("john.doe")
+                .build();
     }
 
     @Test
-    void testSaveUser() {
-        when(userRepository.save(user)).thenReturn(user);
-
-        User savedUser = userService.saveUser(user);
-
-        assertNotNull(savedUser);
-        assertEquals("john.doe", savedUser.getUsername());
-        verify(userRepository, times(1)).save(user);
-    }
-
-    @Test
-    void testValidateCredentials() {
-        when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
-
-        User user = userService.validateCredentials("john.doe", "password123");
-
-        assertEquals("john.doe", user.getUsername());
-        assertEquals("password123", user.getPassword());
-        verify(userRepository, times(1)).findByUsername("john.doe");
-    }
-
-    @Test
-    void testIsPasswordInvalid() {
+    void changePassword_Successful() {
+        ChangePasswordRequestDTO request = ChangePasswordRequestDTO.builder()
+                .username("john.doe")
+                .oldPassword("oldPassword")
+                .newPassword("newPassword")
+                .build();
 
         when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
+        when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
+        when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        assertThrows(InvalidUserCredentialException.class, () ->
-                userService.validateCredentials("john.doe", "wrongpassword"));
+        UserResponseDTO result = userService.changePassword(request);
 
-        verify(userRepository, times(1)).findByUsername("john.doe");
+        assertNotNull(result);
+        assertEquals(userResponseDTO, result);
+        verify(userRepository).findByUsername("john.doe");
+        verify(passwordEncoder).matches("oldPassword", "encodedPassword");
+        verify(passwordEncoder).encode("newPassword");
+        verify(userMapper).toUserResponseDTO(user);
     }
 
+    @Test
+    void changePassword_UserNotFound_ThrowsException() {
+        ChangePasswordRequestDTO request = ChangePasswordRequestDTO.builder()
+                .username("john.doe")
+                .oldPassword("oldPassword")
+                .newPassword("newPassword")
+                .build();
+
+        when(userRepository.findByUsername("john.doe")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.changePassword(request));
+        verify(userRepository).findByUsername("john.doe");
+        verifyNoInteractions(passwordEncoder, userMapper);
+    }
 
     @Test
-    void testChangePassword() {
+    void changePassword_InvalidOldPassword_ThrowsException() {
+        ChangePasswordRequestDTO request = ChangePasswordRequestDTO.builder()
+                .username("john.doe")
+                .oldPassword("wrongPassword")
+                .newPassword("newPassword")
+                .build();
+
         when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrongPassword", "encodedPassword")).thenReturn(false);
 
-        UserResponseDTO expectedResponse = new UserResponseDTO();
-        expectedResponse.setUsername("john.doe");
-
-        when(userMapper.toUserResponseDTO(user)).thenReturn(expectedResponse);
-
-        UserResponseDTO userResponseDTO = userService.changePassword(new ChangePasswordRequestDTO("john.doe", "password123", "newpassword"));
-
-        assertNotNull(userResponseDTO);
-        assertEquals("john.doe", userResponseDTO.getUsername());
-
-        assertEquals("newpassword", user.getPassword());
-
-        verify(userRepository, times(1)).findByUsername("john.doe");
-    }
-
-
-    @Test
-    void testChangePasswordWithIncorrectOldPassword() {
-        when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
-
-        assertThrows(InvalidPasswordException.class, () -> userService.changePassword(new ChangePasswordRequestDTO("john.doe", "wrongpassword", "newpassword")));
-
-        verify(userRepository, never()).updateUserPassword(anyString(), anyString());
+        assertThrows(InvalidPasswordException.class, () -> userService.changePassword(request));
+        verify(userRepository).findByUsername("john.doe");
+        verify(passwordEncoder).matches("wrongPassword", "encodedPassword");
+        verifyNoMoreInteractions(passwordEncoder);
+        verifyNoInteractions(userMapper);
     }
 
     @Test
-    void testGenerateUsername() {
+    void generateUsername_UniqueUsername() {
         when(userRepository.findByUsername("john.doe")).thenReturn(Optional.empty());
 
         String username = userService.generateUsername("John", "Doe");
 
         assertEquals("john.doe", username);
-        verify(userRepository, times(1)).findByUsername("john.doe");
+        verify(userRepository).findByUsername("john.doe");
     }
 
     @Test
-    void testGenerateUsernameWithConflict() {
+    void generateUsername_UsernameConflict() {
         when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
         when(userRepository.findByUsername("john.doe1")).thenReturn(Optional.empty());
 
         String username = userService.generateUsername("John", "Doe");
 
         assertEquals("john.doe1", username);
-        verify(userRepository, times(1)).findByUsername("john.doe");
-        verify(userRepository, times(1)).findByUsername("john.doe1");
+        verify(userRepository).findByUsername("john.doe");
+        verify(userRepository).findByUsername("john.doe1");
     }
 
     @Test
-    void testGenerateRandomPassword() {
+    void generateRandomPassword() {
         String password = userService.generateRandomPassword();
 
         assertNotNull(password);
         assertEquals(10, password.length());
+        assertTrue(password.matches("[A-Za-z0-9]+"));
     }
 
     @Test
-    void testUpdateStatus() {
+    void updateStatus_Successful() {
         when(userRepository.toggleStatus("john.doe")).thenReturn(1);
 
         userService.updateStatus("john.doe");
 
-        verify(userRepository, times(1)).toggleStatus("john.doe");
+        verify(userRepository).toggleStatus("john.doe");
     }
 
     @Test
-    void testDeleteUser() {
+    void updateStatus_UserNotFound_ThrowsException() {
+        when(userRepository.toggleStatus("john.doe")).thenReturn(0);
+
+        assertThrows(ServiceException.class, () -> userService.updateStatus("john.doe"));
+        verify(userRepository).toggleStatus("john.doe");
+    }
+
+    @Test
+    void deleteUser_Successful() {
         when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
 
         userService.deleteUser("john.doe");
 
-        verify(userRepository, times(1)).deleteByUsername("john.doe");
+        verify(userRepository).findByUsername("john.doe");
+        verify(userRepository).deleteByUsername("john.doe");
     }
 
     @Test
-    void testDeleteNonExistentUser() {
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+    void deleteUser_UserNotFound_ThrowsException() {
+        when(userRepository.findByUsername("john.doe")).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> userService.deleteUser("nonexistent"));
-
-        verify(userRepository, never()).deleteByUsername(anyString());
+        assertThrows(RuntimeException.class, () -> userService.deleteUser("john.doe"));
+        verify(userRepository).findByUsername("john.doe");
+        verifyNoMoreInteractions(userRepository);
     }
 
     @Test
-    void testGetUserByUsername() {
+    void login_Successful() {
+        LogInRequestDTO request = LogInRequestDTO.builder()
+                .username("john.doe")
+                .password("password")
+                .build();
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(null);
         when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
+        when(jwtService.generateAccessToken(user)).thenReturn("accessToken");
+        when(jwtService.generateRefreshToken(user)).thenReturn("refreshToken");
+        when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
 
-        User foundUser = userService.getUserByUsername("john.doe");
+        AuthenticationResponseDTO result = userService.login(request);
 
-        assertNotNull(foundUser);
-        assertEquals("john.doe", foundUser.getUsername());
-        verify(userRepository, times(1)).findByUsername("john.doe");
+        assertNotNull(result);
+        assertEquals("accessToken", result.getAccessToken());
+        assertEquals("refreshToken", result.getRefreshToken());
+        assertEquals(userResponseDTO, result.getUser());
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository).findByUsername("john.doe");
+        verify(jwtService).generateAccessToken(user);
+        verify(jwtService).generateRefreshToken(user);
+        verify(userMapper).toUserResponseDTO(user);
     }
 
     @Test
-    void testGetUserByUsernameNotFound() {
-        when(userRepository.findByUsername("nonexistent")).thenReturn(Optional.empty());
+    void login_InvalidCredentials_ThrowsException() {
+        LogInRequestDTO request = LogInRequestDTO.builder()
+                .username("john.doe")
+                .password("wrongPassword")
+                .build();
 
-        assertThrows(RuntimeException.class, () -> userService.getUserByUsername("nonexistent"));
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new RuntimeException());
 
-        verify(userRepository, times(1)).findByUsername("nonexistent");
+        assertThrows(UserNotFoundException.class, () -> userService.login(request));
+        verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verifyNoInteractions(userRepository, jwtService, userMapper);
     }
 }

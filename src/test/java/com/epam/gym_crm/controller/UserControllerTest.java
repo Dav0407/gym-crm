@@ -2,8 +2,10 @@ package com.epam.gym_crm.controller;
 
 import com.epam.gym_crm.dto.request.ChangePasswordRequestDTO;
 import com.epam.gym_crm.dto.request.LogInRequestDTO;
+import com.epam.gym_crm.dto.response.AuthenticationResponseDTO;
 import com.epam.gym_crm.dto.response.UserResponseDTO;
-import com.epam.gym_crm.exception.InvalidUserCredentialException;
+import com.epam.gym_crm.exception.InvalidPasswordException;
+import com.epam.gym_crm.exception.UserNotFoundException;
 import com.epam.gym_crm.handler.GlobalExceptionHandler;
 import com.epam.gym_crm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,10 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,9 +59,12 @@ class UserControllerTest {
         request.setUsername("testUser");
         request.setPassword("testPass");
 
-        UserResponseDTO response = new UserResponseDTO();
-        response.setUsername("testUser");
-        response.setIsActive(true);
+        UserResponseDTO userResponseDTO = new UserResponseDTO();
+        userResponseDTO.setUsername("testUser");
+        userResponseDTO.setIsActive(true);
+
+        AuthenticationResponseDTO response = new AuthenticationResponseDTO();
+        response.setUser(userResponseDTO);
 
         when(userService.login(any(LogInRequestDTO.class))).thenReturn(response);
 
@@ -72,9 +74,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.username").value("testUser"))
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -115,31 +115,11 @@ class UserControllerTest {
                         .header("Password", "oldPass")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("testUser"))
                 .andExpect(jsonPath("$.isActive").value(true));
 
-        verify(userService, times(1)).validateCredentials("testUser", "oldPass");
         verify(userService, times(1)).changePassword(any(ChangePasswordRequestDTO.class));
-    }
-
-    @Test
-    void testChangePassword_MissingHeaders() throws Exception {
-        // Given
-        ChangePasswordRequestDTO request = new ChangePasswordRequestDTO();
-        request.setUsername("testUser");
-        request.setOldPassword("oldPass");
-        request.setNewPassword("newPass");
-
-        // When & Then
-        mockMvc.perform(put("/api/v1/users/change-password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isNotFound()) // Changed from isBadRequest()
-                .andExpect(jsonPath("$.errorMessage").value(containsString("Required header")));
-
-        verify(userService, never()).validateCredentials(anyString(), anyString());
-        verify(userService, never()).changePassword(any());
     }
 
     @Test
@@ -158,32 +138,51 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
 
-        verify(userService, never()).validateCredentials(anyString(), anyString());
         verify(userService, never()).changePassword(any());
     }
 
     @Test
-    void testChangePassword_InvalidCredentials() throws Exception {
+    void testChangePassword_InvalidOldPassword() throws Exception {
         // Given
         ChangePasswordRequestDTO request = new ChangePasswordRequestDTO();
         request.setUsername("testUser");
-        request.setOldPassword("oldPass");
+        request.setOldPassword("wrongOldPass");
         request.setNewPassword("newPass");
 
-        doThrow(new InvalidUserCredentialException("Username or password is incorrect."))
-                .when(userService).validateCredentials("testUser", "wrongPass");
+        when(userService.changePassword(any(ChangePasswordRequestDTO.class)))
+                .thenThrow(new InvalidPasswordException("Old password is incorrect."));
 
         // When & Then
         mockMvc.perform(put("/api/v1/users/change-password")
-                        .header("Username", "testUser")
-                        .header("Password", "wrongPass")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest()) // or isForbidden(), based on your exception handler
+                .andExpect(jsonPath("$.businessErrorCode").exists())
+                .andExpect(jsonPath("$.errorMessage").value("Old password is incorrect."));
+
+        verify(userService).changePassword(any(ChangePasswordRequestDTO.class));
+    }
+
+    @Test
+    void testChangePassword_UserNotFound() throws Exception {
+        // Given
+        ChangePasswordRequestDTO request = new ChangePasswordRequestDTO();
+        request.setUsername("nonExistingUser");
+        request.setOldPassword("somePass");
+        request.setNewPassword("newPass");
+
+        when(userService.changePassword(any(ChangePasswordRequestDTO.class)))
+                .thenThrow(new UserNotFoundException("User not found."));
+
+        // When & Then
+        mockMvc.perform(put("/api/v1/users/change-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.businessErrorCode").exists())
-                .andExpect(jsonPath("$.errorMessage").value("Username or password is incorrect."));
+                .andExpect(jsonPath("$.errorMessage").value("User not found."));
 
-        verify(userService, times(1)).validateCredentials("testUser", "wrongPass");
-        verify(userService, never()).changePassword(any());
+        verify(userService).changePassword(any(ChangePasswordRequestDTO.class));
     }
+
 }

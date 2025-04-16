@@ -3,7 +3,7 @@ package com.epam.gym_crm.handler;
 import com.epam.gym_crm.controller.UserController;
 import com.epam.gym_crm.dto.request.ChangePasswordRequestDTO;
 import com.epam.gym_crm.dto.request.LogInRequestDTO;
-import com.epam.gym_crm.dto.response.ExceptionResponse;
+import com.epam.gym_crm.dto.response.ExceptionResponseDTO;
 import com.epam.gym_crm.exception.InvalidPasswordException;
 import com.epam.gym_crm.exception.InvalidUserCredentialException;
 import com.epam.gym_crm.exception.UserNotFoundException;
@@ -69,8 +69,8 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(VALIDATION_FAILED.getCode(), response.getBusinessErrorCode());
         assertEquals(VALIDATION_FAILED.getDescription(), response.getBusinessErrorDescription());
@@ -95,8 +95,8 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(VALIDATION_FAILED.getCode(), response.getBusinessErrorCode());
         assertEquals(VALIDATION_FAILED.getDescription(), response.getBusinessErrorDescription());
@@ -119,8 +119,8 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(VALIDATION_FAILED.getCode(), response.getBusinessErrorCode());
         assertEquals(VALIDATION_FAILED.getDescription(), response.getBusinessErrorDescription());
@@ -153,8 +153,8 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(USER_NOT_FOUND.getCode(), response.getBusinessErrorCode());
         assertEquals(USER_NOT_FOUND.getDescription(), response.getBusinessErrorDescription());
@@ -170,9 +170,6 @@ class GlobalExceptionHandlerTest {
                 .newPassword("newpass")
                 .build();
 
-        // First mock the credential validation to succeed
-        userService.validateCredentials("testuser", "validpass");
-
         // Then mock the password change to throw the exception
         when(userService.changePassword(any(ChangePasswordRequestDTO.class)))
                 .thenThrow(new InvalidPasswordException("Old password is incorrect."));
@@ -187,8 +184,8 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(VALIDATION_FAILED.getCode(), response.getBusinessErrorCode());
         assertEquals(VALIDATION_FAILED.getDescription(), response.getBusinessErrorDescription());
@@ -214,40 +211,12 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(USER_NOT_FOUND.getCode(), response.getBusinessErrorCode());
         assertEquals(USER_NOT_FOUND.getDescription(), response.getBusinessErrorDescription());
         assertEquals("User not found", response.getErrorMessage());
-    }
-
-    @Test
-    void handleMissingRequestHeaderException_ShouldReturnUnauthorizedResponse() throws Exception {
-        // Given
-        ChangePasswordRequestDTO changePasswordRequest = ChangePasswordRequestDTO.builder()
-                .username("testuser")
-                .oldPassword("oldpass")
-                .newPassword("newpass")
-                .build();
-
-        // When
-        MvcResult result = mockMvc.perform(put("/api/v1/users/change-password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(changePasswordRequest)))
-                .andExpect(status().isNotFound())
-                .andReturn();
-
-        // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
-
-        assertEquals(USER_NOT_FOUND.getCode(), response.getBusinessErrorCode());
-        assertEquals(USER_NOT_FOUND.getDescription(), response.getBusinessErrorDescription());
-
-        // Check for the specific header missing message format
-        assertTrue(response.getErrorMessage().matches("Required header '(Username|Password)' is missing"),
-                "Error message should indicate which header is missing. Actual message: " + response.getErrorMessage());
     }
 
     @Test
@@ -269,8 +238,8 @@ class GlobalExceptionHandlerTest {
                 .andReturn();
 
         // Then
-        ExceptionResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(), ExceptionResponse.class);
+        ExceptionResponseDTO response = objectMapper.readValue(
+                result.getResponse().getContentAsString(), ExceptionResponseDTO.class);
 
         assertEquals(INTERNAL_ERROR.getCode(), response.getBusinessErrorCode());
         assertEquals(INTERNAL_ERROR.getDescription(), response.getBusinessErrorDescription());

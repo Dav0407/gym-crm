@@ -2,17 +2,22 @@ package com.epam.gym_crm.service.impl;
 
 import com.epam.gym_crm.dto.request.ChangePasswordRequestDTO;
 import com.epam.gym_crm.dto.request.LogInRequestDTO;
+import com.epam.gym_crm.dto.response.AuthenticationResponseDTO;
 import com.epam.gym_crm.dto.response.UserResponseDTO;
 import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.exception.InvalidPasswordException;
-import com.epam.gym_crm.exception.InvalidUserCredentialException;
 import com.epam.gym_crm.exception.UserNotFoundException;
 import com.epam.gym_crm.mapper.UserMapper;
 import com.epam.gym_crm.repository.UserRepository;
+import com.epam.gym_crm.service.JwtService;
 import com.epam.gym_crm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +29,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
@@ -36,22 +44,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.save(user);
     }
 
-    @Override
-    public User validateCredentials(String username, String password) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    log.error("Username not found: {}", username);
-                    return new InvalidUserCredentialException("Username or password is incorrect.");
-                });
-
-        if (!user.getPassword().equals(password)) {
-            log.info("Password validation failed for user: {}", username);
-            throw new InvalidUserCredentialException("Username or password is incorrect.");
-        }
-
-        return user;
-    }
-
     @Transactional
     @Override
     public UserResponseDTO changePassword(ChangePasswordRequestDTO request) {
@@ -61,12 +53,14 @@ public class UserServiceImpl implements UserService {
                     return new UserNotFoundException("User not found.");
                 });
 
-        if (!user.getPassword().equals(request.getOldPassword())) {
+        // Here I am comparing with password encoder since BCrypt is used for hashing
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             log.error("Old password does not match for {}", request.getUsername());
             throw new InvalidPasswordException("Old password is incorrect.");
         }
 
-        user.setPassword(request.getNewPassword());
+        // Here we should encode the new password before saving
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         log.info("Password successfully changed for {}", request.getUsername());
 
         return userMapper.toUserResponseDTO(user);
@@ -138,11 +132,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO login(LogInRequestDTO request) {
+    public AuthenticationResponseDTO login(LogInRequestDTO request) {
 
-        User user = validateCredentials(request.getUsername(), request.getPassword());
+        try { // Here the spring manages the username and password match check and returns a user, so I do not need to use repository
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername().toLowerCase(),
+                            request.getPassword()
+                    )
+            ); // I will use this line of code quite a lot to take advantage of Spring Security Context Holder
+            var user = (User) authentication.getPrincipal();
+            var jwtAccessToken = jwtService.generateAccessToken(user);
+            var jwtRefreshToken = jwtService.generateRefreshToken(user);
 
-        return userMapper.toUserResponseDTO(user);
+            return AuthenticationResponseDTO.builder()
+                    .accessToken(jwtAccessToken)
+                    .refreshToken(jwtRefreshToken)
+                    .user(userMapper.toUserResponseDTO(user))
+                    .build();
+        } catch (Exception exception) {
+            log.warn("User with these credentials does not exist");
+            throw new UserNotFoundException("Wrong email and/or password");
+        }
     }
 
     private boolean checkUsernameExists(String username) {

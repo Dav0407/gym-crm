@@ -23,6 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static com.epam.gym_crm.handler.BusinessErrorCodes.RESOURCE_NOT_FOUND;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.USER_UNAUTHORIZED;
 
 @Slf4j
@@ -74,8 +75,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     log.error("Invalid JWT token: {}", jwtAccessToken, exception);
                     throw exception;
                 }
-            } catch (UsernameNotFoundException | TokenIsBlacklistedException exception) {
                 // Here I am doing the same thing as in GlobalExceptionHandler but manually since this is not the MVC layer
+            } catch (UsernameNotFoundException exception) {
+                response.setStatus(HttpStatus.NOT_FOUND.value());
+                response.setContentType("application/json");
+                response.getWriter().write(
+                        new ObjectMapper().writeValueAsString(ExceptionResponseDTO.builder()
+                                .businessErrorCode(RESOURCE_NOT_FOUND.getCode())
+                                .businessErrorDescription(RESOURCE_NOT_FOUND.getDescription())
+                                .errorMessage(exception.getMessage())
+                                .build())
+                );
+                return;
+            } catch (TokenIsBlacklistedException exception) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json");
                 response.getWriter().write(

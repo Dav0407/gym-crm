@@ -7,7 +7,8 @@ import com.epam.gym_crm.dto.response.TraineeTrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerTrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainingTypeResponseDTO;
-import com.epam.gym_crm.entity.User;
+import com.epam.gym_crm.service.TraineeService;
+import com.epam.gym_crm.service.TrainerService;
 import com.epam.gym_crm.service.TrainingService;
 import com.epam.gym_crm.service.TrainingTypeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -41,6 +43,12 @@ public class TrainingControllerTest {
 
     @Mock
     private TrainingService trainingService;
+
+    @Mock
+    private TrainerService trainerService;
+
+    @Mock
+    private TraineeService traineeService;
 
     @Mock
     private TrainingTypeService trainingTypeService;
@@ -68,10 +76,6 @@ public class TrainingControllerTest {
                 .trainingDate(request.getTrainingDate())
                 .trainingDuration(60)
                 .build();
-
-        User user = new User();
-        user.setUsername("trainer.user");
-        user.setPassword("validPass");
 
         when(trainingService.addTraining(any(AddTrainingRequestDTO.class))).thenReturn(response);
 
@@ -110,10 +114,6 @@ public class TrainingControllerTest {
                         .build()
         );
 
-        User user = new User();
-        user.setUsername("trainee.user");
-        user.setPassword("validPass");
-
         when(trainingService.getTraineeTrainings(any(GetTraineeTrainingsRequestDTO.class))).thenReturn(trainings);
 
         mockMvc.perform(post("/api/v1/trainings/trainees")
@@ -149,10 +149,6 @@ public class TrainingControllerTest {
                         .build()
         );
 
-        User user = new User();
-        user.setUsername("trainer.user");
-        user.setPassword("validPass");
-
         when(trainingService.getTrainerTrainings(any(GetTrainerTrainingsRequestDTO.class))).thenReturn(trainings);
 
         mockMvc.perform(post("/api/v1/trainings/trainers")
@@ -163,6 +159,8 @@ public class TrainingControllerTest {
                 .andExpect(status().isFound())
                 .andExpect(jsonPath("$[0].traineeName").value("John Trainee"))
                 .andExpect(jsonPath("$[1].traineeName").value("Jane Trainee"));
+
+        verify(trainingService).getTrainerTrainings(any(GetTrainerTrainingsRequestDTO.class));
     }
 
     @Test
@@ -177,10 +175,6 @@ public class TrainingControllerTest {
                         .trainingTypeName("Strength")
                         .build()
         );
-
-        User user = new User();
-        user.setUsername("admin.user");
-        user.setPassword("validPass");
 
         when(trainingTypeService.getAllTrainingTypes()).thenReturn(trainingTypes);
 

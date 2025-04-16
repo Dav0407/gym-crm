@@ -39,7 +39,7 @@ public class SecurityFilterChainConfig {
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->
-                        logout.logoutUrl("/api/v1/auth/logout")
+                        logout.logoutUrl("/api/v1/users/logout")
                                 .addLogoutHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
                 );
         return http.build();

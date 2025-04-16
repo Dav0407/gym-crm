@@ -8,7 +8,6 @@ import com.epam.gym_crm.dto.response.TrainerResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerSecureResponseDTO;
 import com.epam.gym_crm.service.TraineeTrainerService;
 import com.epam.gym_crm.service.TrainerService;
-import com.epam.gym_crm.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,7 +38,6 @@ import java.util.List;
 @Tag(name = "Trainer API", description = "API endpoints for managing trainer profiles and assignments in the Gym CRM system")
 public class TrainerController {
 
-    private final UserService userService;
     private final TrainerService trainerService;
     private final TraineeTrainerService traineeTrainerService;
 
@@ -68,14 +65,7 @@ public class TrainerController {
     @GetMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TrainerProfileResponseDTO> getTrainerProfile(@PathVariable("username") @NotBlank(message = "Username is required")
                                                                        @Parameter(description = "Username of the trainer to retrieve", required = true, example = "jane.smith")
-                                                                       String username,
-                                                                       @RequestHeader(value = "Username")
-                                                                       @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                       String headerUsername,
-                                                                       @RequestHeader(value = "Password")
-                                                                       @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                       String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                       String username) {
         TrainerProfileResponseDTO response = trainerService.getTrainerByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -90,14 +80,7 @@ public class TrainerController {
     })
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TrainerProfileResponseDTO> updateTrainerProfile(@Valid @RequestBody @Parameter(description = "Trainer profile update details", required = true)
-                                                                          UpdateTrainerProfileRequestDTO request,
-                                                                          @RequestHeader(value = "Username")
-                                                                          @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                          String headerUsername,
-                                                                          @RequestHeader(value = "Password")
-                                                                          @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                          String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                          UpdateTrainerProfileRequestDTO request) {
         TrainerProfileResponseDTO response = trainerService.updateTrainerProfile(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -112,14 +95,7 @@ public class TrainerController {
     @GetMapping(value = "/not-assigned/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TrainerSecureResponseDTO>> getNotAssignedTrainers(@PathVariable("username") @NotBlank(message = "Username is required")
                                                                                  @Parameter(description = "Username of the trainee to check unassigned trainers for", required = true, example = "john.doe")
-                                                                                 String username,
-                                                                                 @RequestHeader(value = "Username")
-                                                                                 @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                                 String headerUsername,
-                                                                                 @RequestHeader(value = "Password")
-                                                                                 @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                                 String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                                 String username) {
         List<TrainerSecureResponseDTO> response = trainerService.getNotAssignedTrainersByTraineeUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -134,14 +110,7 @@ public class TrainerController {
     })
     @PutMapping(value = "/assign", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TrainerSecureResponseDTO>> updateTraineesTrainersList(@Valid @RequestBody @Parameter(description = "Details for updating the trainer list for a trainee", required = true)
-                                                                                     UpdateTrainerListRequestDTO request,
-                                                                                     @RequestHeader(value = "Username")
-                                                                                     @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                                     String headerUsername,
-                                                                                     @RequestHeader(value = "Password")
-                                                                                     @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                                     String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                                     UpdateTrainerListRequestDTO request) {
         List<TrainerSecureResponseDTO> response = traineeTrainerService.updateTraineeTrainers(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -156,14 +125,7 @@ public class TrainerController {
     @PatchMapping(value = "/{trainer-username}/status", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TrainerProfileResponseDTO> switchTrainerStatus(@PathVariable("trainer-username") @NotBlank(message = "Username is required")
                                                                          @Parameter(description = "Username of the trainer whose status will be toggled", required = true, example = "jane.smith")
-                                                                         String trainerUsername,
-                                                                         @RequestHeader(value = "Username")
-                                                                         @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                         String headerUsername,
-                                                                         @RequestHeader(value = "Password")
-                                                                         @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                         String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                         String trainerUsername) {
         trainerService.updateStatus(trainerUsername);
         TrainerProfileResponseDTO response = trainerService.getTrainerByUsername(trainerUsername);
         return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -6,7 +6,6 @@ import com.epam.gym_crm.dto.response.TraineeProfileResponseDTO;
 import com.epam.gym_crm.dto.response.TraineeResponseDTO;
 import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.service.TraineeService;
-import com.epam.gym_crm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,9 +39,6 @@ public class TraineeControllerTest {
 
     @Mock
     private TraineeService traineeService;
-
-    @Mock
-    private UserService userService;
 
     @InjectMocks
     private TraineeController traineeController;
@@ -85,7 +81,6 @@ public class TraineeControllerTest {
         user.setUsername(username);
         user.setPassword("validPass");
 
-        when(userService.validateCredentials(username, "validPass")).thenReturn(user);
         when(traineeService.getTraineeByUsername(username)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/trainees/{username}", username)
@@ -123,7 +118,6 @@ public class TraineeControllerTest {
         user.setUsername("john.doe");
         user.setPassword("validPass");
 
-        when(userService.validateCredentials("john.doe", "validPass")).thenReturn(user);
         when(traineeService.updateTraineeProfile(any(UpdateTraineeProfileRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/v1/trainees")
@@ -150,7 +144,6 @@ public class TraineeControllerTest {
         user.setUsername(username);
         user.setPassword("validPass");
 
-        when(userService.validateCredentials(username, "validPass")).thenReturn(user);
         when(traineeService.deleteTraineeProfileByUsername(username)).thenReturn(response);
 
         mockMvc.perform(delete("/api/v1/trainees/{username}", username)
@@ -180,7 +173,6 @@ public class TraineeControllerTest {
         user.setPassword("validPass");
 
         // Mock the service calls
-        when(userService.validateCredentials(username, "validPass")).thenReturn(user);
         doNothing().when(traineeService).updateStatus(username);
         when(traineeService.getTraineeByUsername(username)).thenReturn(response);
 

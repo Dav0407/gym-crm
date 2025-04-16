@@ -9,7 +9,6 @@ import com.epam.gym_crm.dto.response.TrainerSecureResponseDTO;
 import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.service.TraineeTrainerService;
 import com.epam.gym_crm.service.TrainerService;
-import com.epam.gym_crm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,9 +41,6 @@ public class TrainerControllerTest {
 
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Mock
-    private UserService userService;
 
     @Mock
     private TrainerService trainerService;
@@ -96,7 +92,6 @@ public class TrainerControllerTest {
         user.setUsername(username);
         user.setPassword("validPass");
 
-        when(userService.validateCredentials(username, "validPass")).thenReturn(user);
         when(trainerService.getTrainerByUsername(username)).thenReturn(response);
 
         mockMvc.perform(get("/api/v1/trainers/{username}", username)
@@ -129,7 +124,6 @@ public class TrainerControllerTest {
         user.setUsername("john.doe");
         user.setPassword("validPass");
 
-        when(userService.validateCredentials("john.doe", "validPass")).thenReturn(user);
         when(trainerService.updateTrainerProfile(any(UpdateTrainerProfileRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(put("/api/v1/trainers")
@@ -165,7 +159,6 @@ public class TrainerControllerTest {
         user.setUsername(traineeUsername);
         user.setPassword("validPass");
 
-        when(userService.validateCredentials(traineeUsername, "validPass")).thenReturn(user);
         when(trainerService.getNotAssignedTrainersByTraineeUsername(traineeUsername)).thenReturn(trainers);
 
         mockMvc.perform(get("/api/v1/trainers/not-assigned/{username}", traineeUsername)
@@ -206,9 +199,6 @@ public class TrainerControllerTest {
         user.setUsername("trainee.user");
         user.setPassword("validPass");
 
-        // Mock the complete flow
-        when(userService.validateCredentials("trainee.user", "validPass")).thenReturn(user);
-
         // Use doReturn().when() for more reliable stubbing
         doReturn(updatedTrainers).when(traineeTrainerService).updateTraineeTrainers(any(UpdateTrainerListRequestDTO.class));
 
@@ -227,8 +217,6 @@ public class TrainerControllerTest {
                 .andExpect(jsonPath("$[1].firstName").value("Trainer"))
                 .andExpect(jsonPath("$[1].lastName").value("Two"));
 
-        // Verify interactions
-        verify(userService).validateCredentials("trainee.user", "validPass");
         verify(traineeTrainerService).updateTraineeTrainers(any(UpdateTrainerListRequestDTO.class));
     }
 
@@ -245,7 +233,6 @@ public class TrainerControllerTest {
         user.setUsername(username);
         user.setPassword("validPass");
 
-        when(userService.validateCredentials(username, "validPass")).thenReturn(user);
         doNothing().when(trainerService).updateStatus(username);
         when(trainerService.getTrainerByUsername(username)).thenReturn(response);
 

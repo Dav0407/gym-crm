@@ -9,7 +9,6 @@ import com.epam.gym_crm.dto.response.TrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainingTypeResponseDTO;
 import com.epam.gym_crm.service.TrainingService;
 import com.epam.gym_crm.service.TrainingTypeService;
-import com.epam.gym_crm.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,7 +35,6 @@ import java.util.List;
 @Tag(name = "Training API", description = "API endpoints for managing trainings and training types in the Gym CRM system")
 public class TrainingController {
 
-    private final UserService userService;
     private final TrainingService trainingService;
     private final TrainingTypeService trainingTypeService;
 
@@ -51,14 +48,7 @@ public class TrainingController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TrainingResponseDTO> addTraining(@Valid @RequestBody
                                                            @Parameter(description = "Details for creating a new training session", required = true)
-                                                           AddTrainingRequestDTO request,
-                                                           @RequestHeader(value = "Username")
-                                                           @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                           String headerUsername,
-                                                           @RequestHeader(value = "Password")
-                                                           @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                           String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                           AddTrainingRequestDTO request) {
         TrainingResponseDTO response = trainingService.addTraining(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -74,14 +64,7 @@ public class TrainingController {
     @PostMapping(value = "/trainees", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TraineeTrainingResponseDTO>> getTraineeTrainings(@Valid @RequestBody
                                                                                 @Parameter(description = "Criteria for retrieving trainee trainings (e.g., username, date range)", required = true)
-                                                                                GetTraineeTrainingsRequestDTO request,
-                                                                                @RequestHeader(value = "Username")
-                                                                                @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                                String headerUsername,
-                                                                                @RequestHeader(value = "Password")
-                                                                                @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                                String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                                GetTraineeTrainingsRequestDTO request) {
         List<TraineeTrainingResponseDTO> response = trainingService.getTraineeTrainings(request);
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }
@@ -97,14 +80,7 @@ public class TrainingController {
     @PostMapping(value = "/trainers", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TrainerTrainingResponseDTO>> getTrainerTrainings(@Valid @RequestBody
                                                                                 @Parameter(description = "Criteria for retrieving trainer trainings (e.g., username, date range)", required = true)
-                                                                                GetTrainerTrainingsRequestDTO request,
-                                                                                @RequestHeader(value = "Username")
-                                                                                @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                                String headerUsername,
-                                                                                @RequestHeader(value = "Password")
-                                                                                @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                                String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+                                                                                GetTrainerTrainingsRequestDTO request) {
         List<TrainerTrainingResponseDTO> response = trainingService.getTrainerTrainings(request);
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }
@@ -116,13 +92,7 @@ public class TrainingController {
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
     @GetMapping(value = "/types", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<TrainingTypeResponseDTO>> getTrainingTypes(@RequestHeader(value = "Username")
-                                                                          @Parameter(description = "Username for authentication", required = true, example = "admin")
-                                                                          String headerUsername,
-                                                                          @RequestHeader(value = "Password")
-                                                                          @Parameter(description = "Password for authentication", required = true, example = "password123")
-                                                                          String headerPassword) {
-        userService.validateCredentials(headerUsername, headerPassword);
+    public ResponseEntity<List<TrainingTypeResponseDTO>> getTrainingTypes() {
         List<TrainingTypeResponseDTO> response = trainingTypeService.getAllTrainingTypes();
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }

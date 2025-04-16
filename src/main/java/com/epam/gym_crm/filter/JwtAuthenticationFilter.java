@@ -1,6 +1,6 @@
 package com.epam.gym_crm.filter;
 
-import com.epam.gym_crm.dto.response.ExceptionResponse;
+import com.epam.gym_crm.dto.response.ExceptionResponseDTO;
 import com.epam.gym_crm.exception.TokenIsBlacklistedException;
 import com.epam.gym_crm.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
                 response.setContentType("application/json");
                 response.getWriter().write(
-                        new ObjectMapper().writeValueAsString(ExceptionResponse.builder()
+                        new ObjectMapper().writeValueAsString(ExceptionResponseDTO.builder()
                                 .businessErrorCode(USER_UNAUTHORIZED.getCode())
                                 .businessErrorDescription(USER_UNAUTHORIZED.getDescription())
                                 .errorMessage(exception.getMessage())

@@ -10,7 +10,6 @@ import com.epam.gym_crm.dto.response.TrainingTypeResponseDTO;
 import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.service.TrainingService;
 import com.epam.gym_crm.service.TrainingTypeService;
-import com.epam.gym_crm.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,9 +38,6 @@ public class TrainingControllerTest {
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-    @Mock
-    private UserService userService;
 
     @Mock
     private TrainingService trainingService;
@@ -77,7 +73,6 @@ public class TrainingControllerTest {
         user.setUsername("trainer.user");
         user.setPassword("validPass");
 
-        when(userService.validateCredentials("trainer.user", "validPass")).thenReturn(user);
         when(trainingService.addTraining(any(AddTrainingRequestDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/trainings")
@@ -119,7 +114,6 @@ public class TrainingControllerTest {
         user.setUsername("trainee.user");
         user.setPassword("validPass");
 
-        when(userService.validateCredentials("trainee.user", "validPass")).thenReturn(user);
         when(trainingService.getTraineeTrainings(any(GetTraineeTrainingsRequestDTO.class))).thenReturn(trainings);
 
         mockMvc.perform(post("/api/v1/trainings/trainees")
@@ -159,7 +153,6 @@ public class TrainingControllerTest {
         user.setUsername("trainer.user");
         user.setPassword("validPass");
 
-        when(userService.validateCredentials("trainer.user", "validPass")).thenReturn(user);
         when(trainingService.getTrainerTrainings(any(GetTrainerTrainingsRequestDTO.class))).thenReturn(trainings);
 
         mockMvc.perform(post("/api/v1/trainings/trainers")
@@ -189,7 +182,6 @@ public class TrainingControllerTest {
         user.setUsername("admin.user");
         user.setPassword("validPass");
 
-        when(userService.validateCredentials("admin.user", "validPass")).thenReturn(user);
         when(trainingTypeService.getAllTrainingTypes()).thenReturn(trainingTypes);
 
         mockMvc.perform(get("/api/v1/trainings/types")

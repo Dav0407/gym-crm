@@ -66,6 +66,7 @@ public class TrainerController {
     public ResponseEntity<TrainerProfileResponseDTO> getTrainerProfile(@PathVariable("username") @NotBlank(message = "Username is required")
                                                                        @Parameter(description = "Username of the trainer to retrieve", required = true, example = "jane.smith")
                                                                        String username) {
+        trainerService.checkOwnership(username);
         TrainerProfileResponseDTO response = trainerService.getTrainerByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -81,6 +82,7 @@ public class TrainerController {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TrainerProfileResponseDTO> updateTrainerProfile(@Valid @RequestBody @Parameter(description = "Trainer profile update details", required = true)
                                                                           UpdateTrainerProfileRequestDTO request) {
+        trainerService.checkOwnership(request.getUsername());
         TrainerProfileResponseDTO response = trainerService.updateTrainerProfile(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -96,6 +98,7 @@ public class TrainerController {
     public ResponseEntity<List<TrainerSecureResponseDTO>> getNotAssignedTrainers(@PathVariable("username") @NotBlank(message = "Username is required")
                                                                                  @Parameter(description = "Username of the trainee to check unassigned trainers for", required = true, example = "john.doe")
                                                                                  String username) {
+        trainerService.checkOwnership(username);
         List<TrainerSecureResponseDTO> response = trainerService.getNotAssignedTrainersByTraineeUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -111,6 +114,7 @@ public class TrainerController {
     @PutMapping(value = "/assign", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<TrainerSecureResponseDTO>> updateTraineesTrainersList(@Valid @RequestBody @Parameter(description = "Details for updating the trainer list for a trainee", required = true)
                                                                                      UpdateTrainerListRequestDTO request) {
+        trainerService.checkOwnership(request.getTraineeUsername());
         List<TrainerSecureResponseDTO> response = traineeTrainerService.updateTraineeTrainers(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -126,6 +130,7 @@ public class TrainerController {
     public ResponseEntity<TrainerProfileResponseDTO> switchTrainerStatus(@PathVariable("trainer-username") @NotBlank(message = "Username is required")
                                                                          @Parameter(description = "Username of the trainer whose status will be toggled", required = true, example = "jane.smith")
                                                                          String trainerUsername) {
+        trainerService.checkOwnership(trainerUsername);
         trainerService.updateStatus(trainerUsername);
         TrainerProfileResponseDTO response = trainerService.getTrainerByUsername(trainerUsername);
         return ResponseEntity.status(HttpStatus.OK).body(response);

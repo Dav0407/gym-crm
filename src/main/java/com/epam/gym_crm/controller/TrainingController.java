@@ -7,6 +7,8 @@ import com.epam.gym_crm.dto.response.TraineeTrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerTrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainingTypeResponseDTO;
+import com.epam.gym_crm.service.TraineeService;
+import com.epam.gym_crm.service.TrainerService;
 import com.epam.gym_crm.service.TrainingService;
 import com.epam.gym_crm.service.TrainingTypeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,6 +37,8 @@ import java.util.List;
 @Tag(name = "Training API", description = "API endpoints for managing trainings and training types in the Gym CRM system")
 public class TrainingController {
 
+    private final TraineeService traineeService;
+    private final TrainerService trainerService;
     private final TrainingService trainingService;
     private final TrainingTypeService trainingTypeService;
 
@@ -65,6 +69,7 @@ public class TrainingController {
     public ResponseEntity<List<TraineeTrainingResponseDTO>> getTraineeTrainings(@Valid @RequestBody
                                                                                 @Parameter(description = "Criteria for retrieving trainee trainings (e.g., username, date range)", required = true)
                                                                                 GetTraineeTrainingsRequestDTO request) {
+        traineeService.checkOwnership(request.getTraineeUsername());
         List<TraineeTrainingResponseDTO> response = trainingService.getTraineeTrainings(request);
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }
@@ -81,6 +86,7 @@ public class TrainingController {
     public ResponseEntity<List<TrainerTrainingResponseDTO>> getTrainerTrainings(@Valid @RequestBody
                                                                                 @Parameter(description = "Criteria for retrieving trainer trainings (e.g., username, date range)", required = true)
                                                                                 GetTrainerTrainingsRequestDTO request) {
+        trainerService.checkOwnership(request.getTrainerUsername());
         List<TrainerTrainingResponseDTO> response = trainingService.getTrainerTrainings(request);
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }

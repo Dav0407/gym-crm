@@ -34,6 +34,9 @@ import static org.mockito.Mockito.when;
 class TraineeServiceImplTest {
 
     @Mock
+    private JwtService jwtService;
+
+    @Mock
     private TraineeRepository traineeRepository;
 
     @Mock
@@ -112,6 +115,9 @@ class TraineeServiceImplTest {
         when(userService.saveUser(any(User.class))).thenReturn(user);
         when(traineeRepository.save(any(Trainee.class))).thenReturn(trainee);
         when(traineeMapper.toTraineeResponseDTO(trainee)).thenReturn(traineeResponseDTO);
+        when(jwtService.generateAccessToken(any(User.class))).thenReturn("mocked-access-token");
+        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("mocked-refresh-token");
+
 
         TraineeResponseDTO response = traineeService.createTraineeProfile(createRequest);
 

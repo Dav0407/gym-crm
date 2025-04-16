@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.epam.gym_crm.handler.BusinessErrorCodes.ACCESS_FORBIDDEN;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.INTERNAL_ERROR;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.RESOURCE_NOT_FOUND;
 import static com.epam.gym_crm.handler.BusinessErrorCodes.USER_NOT_FOUND;
@@ -39,6 +41,17 @@ public class GlobalExceptionHandler {
                 VALIDATION_FAILED,
                 "One or more fields are invalid.",
                 errors
+        );
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleAccessDeniedException(AccessDeniedException exception) {
+        LOG.error("AccessDeniedException: ", exception);
+
+        return createExceptionResponse(
+                ACCESS_FORBIDDEN,
+                exception.getMessage(),
+                null
         );
     }
 

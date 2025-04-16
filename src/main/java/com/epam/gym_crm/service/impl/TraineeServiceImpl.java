@@ -14,6 +14,8 @@ import com.epam.gym_crm.service.TraineeService;
 import com.epam.gym_crm.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -116,17 +118,31 @@ public class TraineeServiceImpl implements TraineeService {
         return traineeMapper.toTraineeResponseDTO(trainee);
     }
 
-    private TraineeResponseDTO addTokensToDTO(Trainee trainee, TraineeResponseDTO response) {
+    @Override
+    public JwtService getJwtService() {
+        return jwtService;
+    }
 
-        String accessToken = jwtService.generateAccessToken(trainee.getUser());
-        log.info("Access token generated successfully");
+    @Override
+    public User getUserFromEntity(Trainee entity) {
+        return entity.getUser();
+    }
 
-        String refreshToken = jwtService.generateRefreshToken(trainee.getUser());
-        log.info("Refresh token generated successfully");
-
+    @Override
+    public void setAccessToken(TraineeResponseDTO response, String accessToken) {
         response.setAccessToken(accessToken);
-        response.setRefreshToken(refreshToken);
+    }
 
-        return response;
+    @Override
+    public void setRefreshToken(TraineeResponseDTO response, String refreshToken) {
+        response.setRefreshToken(refreshToken);
+    }
+
+    public void checkOwnership(String requestedUsername) throws AccessDeniedException {
+        User connectedUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String authenticatedUsername = connectedUser.getUsername();
+        if (!authenticatedUsername.equals(requestedUsername)) {
+            throw new AccessDeniedException("You are not authorized to access this resource");
+        }
     }
 }

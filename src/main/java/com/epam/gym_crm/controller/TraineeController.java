@@ -61,6 +61,7 @@ public class TraineeController {
     public ResponseEntity<TraineeProfileResponseDTO> getTraineeProfile(@PathVariable("username") @NotBlank(message = "Username is required")
                                                                        @Parameter(description = "Username of the trainee to retrieve", required = true, example = "john.doe")
                                                                        String username) {
+        traineeService.checkOwnership(username);
         TraineeProfileResponseDTO response = traineeService.getTraineeByUsername(username);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -76,6 +77,7 @@ public class TraineeController {
     @PutMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TraineeProfileResponseDTO> updateTraineeProfile(@Valid @RequestBody @Parameter(description = "Trainee profile update details", required = true)
                                                                           UpdateTraineeProfileRequestDTO request) {
+        traineeService.checkOwnership(request.getUsername());
         TraineeProfileResponseDTO response = traineeService.updateTraineeProfile(request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
@@ -91,6 +93,7 @@ public class TraineeController {
     public ResponseEntity<TraineeProfileResponseDTO> deleteTraineeProfile(@PathVariable("username") @NotBlank(message = "Username is required")
                                                                           @Parameter(description = "Username of the trainee to delete", required = true, example = "john.doe")
                                                                           String username) {
+        traineeService.checkOwnership(username);
         TraineeProfileResponseDTO response = traineeService.deleteTraineeProfileByUsername(username);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
@@ -106,6 +109,7 @@ public class TraineeController {
     public ResponseEntity<TraineeProfileResponseDTO> switchTraineeStatus(@PathVariable("trainee-username") @NotBlank(message = "Username is required")
                                                                          @Parameter(description = "Username of the trainee whose status will be toggled", required = true, example = "john.doe")
                                                                          String traineeUsername) {
+        traineeService.checkOwnership(traineeUsername);
         traineeService.updateStatus(traineeUsername);
         TraineeProfileResponseDTO response = traineeService.getTraineeByUsername(traineeUsername);
         return ResponseEntity.status(HttpStatus.OK).body(response);

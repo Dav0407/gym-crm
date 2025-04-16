@@ -37,6 +37,9 @@ import static org.mockito.Mockito.when;
 public class TrainerServiceImplTest {
 
     @Mock
+    private JwtService jwtService;
+
+    @Mock
     private TrainerRepository trainerRepository;
 
     @Mock
@@ -120,6 +123,9 @@ public class TrainerServiceImplTest {
         when(userService.generateRandomPassword()).thenReturn("randomPassword123");
         when(userService.saveUser(any(User.class))).thenReturn(user);
         when(trainingTypeService.findByValue("Fitness")).thenReturn(Optional.of(trainingType));
+        when(jwtService.generateAccessToken(any(User.class))).thenReturn("mocked-access-token");
+        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("mocked-refresh-token");
+
 
         Trainer savedTrainer = new Trainer();
         savedTrainer.setUser(user);

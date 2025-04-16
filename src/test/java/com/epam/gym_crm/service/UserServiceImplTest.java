@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -28,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -198,9 +200,12 @@ class UserServiceImplTest {
                 .password("password")
                 .build();
 
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.getPrincipal()).thenReturn(user); // This is the key part
+
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .thenReturn(null);
-        when(userRepository.findByUsername("john.doe")).thenReturn(Optional.of(user));
+                .thenReturn(authentication);
+
         when(jwtService.generateAccessToken(user)).thenReturn("accessToken");
         when(jwtService.generateRefreshToken(user)).thenReturn("refreshToken");
         when(userMapper.toUserResponseDTO(user)).thenReturn(userResponseDTO);
@@ -211,12 +216,13 @@ class UserServiceImplTest {
         assertEquals("accessToken", result.getAccessToken());
         assertEquals("refreshToken", result.getRefreshToken());
         assertEquals(userResponseDTO, result.getUser());
+
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(userRepository).findByUsername("john.doe");
         verify(jwtService).generateAccessToken(user);
         verify(jwtService).generateRefreshToken(user);
         verify(userMapper).toUserResponseDTO(user);
     }
+
 
     @Test
     void login_InvalidCredentials_ThrowsException() {

@@ -11,9 +11,13 @@ import com.epam.gym_crm.mapper.UserMapper;
 import com.epam.gym_crm.repository.UserRepository;
 import com.epam.gym_crm.service.JwtService;
 import com.epam.gym_crm.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,7 +25,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +44,7 @@ public class UserServiceImpl implements UserService {
 
     private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final Map<String, String> TEMPORARY_PLAIN_PASSWORDS = new ConcurrentHashMap<>();
 
     @Override
     public User saveUser(User user) {
@@ -96,6 +104,11 @@ public class UserServiceImpl implements UserService {
         return password;
     }
 
+    @Override
+    public String encryptPassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
     @Transactional
     @Override
     public void updateStatus(String username) {
@@ -145,15 +158,66 @@ public class UserServiceImpl implements UserService {
             var jwtAccessToken = jwtService.generateAccessToken(user);
             var jwtRefreshToken = jwtService.generateRefreshToken(user);
 
+            UserResponseDTO userResponseDTO = userMapper.toUserResponseDTO(user);
+            userResponseDTO.setPassword(getPlainPassword(request.getUsername()));
+
             return AuthenticationResponseDTO.builder()
                     .accessToken(jwtAccessToken)
                     .refreshToken(jwtRefreshToken)
-                    .user(userMapper.toUserResponseDTO(user))
+                    .user(userResponseDTO)
                     .build();
         } catch (Exception exception) {
             log.warn("User with these credentials does not exist");
             throw new UserNotFoundException("Wrong email and/or password");
         }
+    }
+
+    @Override
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String refreshToken;
+        final String username;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        refreshToken = authHeader.substring(7);
+
+        //user should not have an access refreshing token with access token
+        if (!jwtService.isRefreshToken(refreshToken)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        }
+
+        username = jwtService.extractUsername(refreshToken);
+        if (username != null) {
+
+            var user = this.userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+            //if it is not, then we can go and create new access token using refresh token
+            if (jwtService.isRefreshTokenValid(refreshToken, user)) {
+
+                jwtService.blackListToken(refreshToken); // Here we need to invalidate the refresh token and generate a new one
+
+                var accessToken = jwtService.generateAccessToken(user);
+                var newRefreshToken = jwtService.generateRefreshToken(user);
+
+                var authResponse = AuthenticationResponseDTO.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(newRefreshToken)
+                        .build();
+                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+            }
+        }
+    }
+
+    @Override
+    public String getPlainPassword(String username) {
+        return TEMPORARY_PLAIN_PASSWORDS.get(username);
+    }
+
+    @Override
+    public void addPlainPassword(String username, String password) {
+        TEMPORARY_PLAIN_PASSWORDS.put(username, password);
     }
 
     private boolean checkUsernameExists(String username) {

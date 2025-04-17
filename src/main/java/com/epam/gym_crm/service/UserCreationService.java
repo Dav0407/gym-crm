@@ -16,11 +16,15 @@ public interface UserCreationService {
             throw new IllegalArgumentException("First name and last name cannot be empty");
         }
 
+        String username = getUserService().generateUsername(firstName, lastName);
+        String plainPassword = getUserService().generateRandomPassword();
+        getUserService().addPlainPassword(username, plainPassword);
+
         User user = User.builder()
                 .firstName(firstName.trim())
                 .lastName(lastName.trim())
-                .username(getUserService().generateUsername(firstName, lastName))
-                .password(getUserService().generateRandomPassword())
+                .username(username)
+                .password(getUserService().encryptPassword(plainPassword)) //hashing the password using bcrypt
                 .isActive(true)
                 .build();
 

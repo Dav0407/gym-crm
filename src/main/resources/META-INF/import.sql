@@ -9,15 +9,13 @@ INSERT INTO training_types (training_type_name) VALUES ('Zumba');
 INSERT INTO training_types (training_type_name) VALUES ('Boxing');
 INSERT INTO training_types (training_type_name) VALUES ('Swimming');
 
-
-
 -- Inserting Users (Trainees and Trainers)
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (100, 'John', 'Doe', 'john.doe', 'password123', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (200, 'Jane', 'Smith', 'jane.smith', 'password123', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (300, 'Mike', 'Johnson', 'mike.johnson', 'password123', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (400, 'Emma', 'Brown', 'emma.brown', 'password123', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (500, 'David', 'Williams', 'david.williams', 'password123', true);
-INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (600, 'Sarah', 'Miller', 'sarah.miller', 'password123', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (100, 'John', 'Doe', 'john.doe', '$2a$10$WPCzhc.jFB8vQ7XbAcTRIeRvSLSJxaApl6TnO6QwTvRki8U96ffkq', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (200, 'Jane', 'Smith', 'jane.smith', '$2a$10$fS5w008C5r6DEzpHE3N2nOO4HFRP3/epOnzCvZuyE1FBte0lIFPJm', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (300, 'Mike', 'Johnson', 'mike.johnson', '$2a$10$6ecLRpUavI37PVPzeFQNVeqtbPsKXHKh.9gzLOSK5OLZZc731AM5G', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (400, 'Emma', 'Brown', 'emma.brown', '$2a$10$9vR5m5XuvVmj5qNmwR3/yOhqPaVOPLitmkDfFs3v/nZpWZqnjWroq', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (500, 'David', 'Williams', 'david.williams', '$2a$10$YHXbGVAfyBBP9lUmyOq5aOOwrJ7vfPfCnEgI3Oqje8S32NBiEc.oW', true);
+INSERT INTO users (id, first_name, last_name, username, password, is_active) VALUES (600, 'Sarah', 'Miller', 'sarah.miller', '$2a$10$eU47shKNsUuq1dLtLub0/.jUwwJbHbEZVe0WyU4bOMoeBVF2tceNW', true);
 
 -- Inserting Trainees
 INSERT INTO trainees (id, date_of_birth, address, user_id) VALUES (100, '1995-06-15', '123 Main St, City A', 100);

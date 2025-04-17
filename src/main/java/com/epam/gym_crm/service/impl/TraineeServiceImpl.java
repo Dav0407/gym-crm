@@ -49,6 +49,9 @@ public class TraineeServiceImpl implements TraineeService {
 
         TraineeResponseDTO response = getTraineeResponseDTO(savedTrainee);
 
+        //Here It is important to give a plain password instead of hashed from db
+        response.setPassword(userService.getPlainPassword(response.getUsername()));
+
         return addTokensToDTO(savedTrainee, response);
     }
 
@@ -71,7 +74,11 @@ public class TraineeServiceImpl implements TraineeService {
         Trainee trainee = traineeRepository.findByUser_Id(userByUsername.getId())
                 .orElseThrow(() -> new UserNotFoundException("Trainee not found with username: " + userByUsername.getUsername()));
 
-        return traineeMapper.toTraineeProfileResponseDTO(trainee);
+        TraineeProfileResponseDTO traineeProfileResponseDTO = traineeMapper.toTraineeProfileResponseDTO(trainee);
+
+        traineeProfileResponseDTO.setPassword(userService.getPlainPassword(username));
+
+        return traineeProfileResponseDTO;
     }
 
     @Override
@@ -93,7 +100,10 @@ public class TraineeServiceImpl implements TraineeService {
         trainee.setDateOfBirth(request.getDateOfBirth());
         trainee.setAddress(request.getAddress().trim());
 
-        return traineeMapper.toTraineeProfileResponseDTO(trainee);
+        TraineeProfileResponseDTO traineeProfileResponseDTO = traineeMapper.toTraineeProfileResponseDTO(trainee);
+        traineeProfileResponseDTO.setPassword(userService.getPlainPassword(request.getUsername()));
+
+        return traineeProfileResponseDTO;
     }
 
     @Override
@@ -105,6 +115,9 @@ public class TraineeServiceImpl implements TraineeService {
     @Override
     public TraineeProfileResponseDTO deleteTraineeProfileByUsername(String username) {
         TraineeProfileResponseDTO traineeByUsername = getTraineeByUsername(username);
+
+        traineeByUsername.setPassword(userService.getPlainPassword(username));
+
         userService.deleteUser(username);
         return traineeByUsername;
     }

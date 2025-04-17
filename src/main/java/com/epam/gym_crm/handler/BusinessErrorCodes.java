@@ -12,7 +12,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Getter
 public enum BusinessErrorCodes {
 
-    USER_UNAUTHORIZED(401, UNAUTHORIZED, "User data not found"),
+    USER_UNAUTHORIZED(401, UNAUTHORIZED, "User unauthorized"),
     INTERNAL_ERROR(500, INTERNAL_SERVER_ERROR, "Something went wrong in the server side, it is not you."),
     USER_NOT_FOUND(404, NOT_FOUND, "User with these credentials does not exist"),
     RESOURCE_NOT_FOUND(404, NOT_FOUND, "Resource with these credentials does not exist"),

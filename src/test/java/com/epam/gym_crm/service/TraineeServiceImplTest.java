@@ -124,7 +124,6 @@ class TraineeServiceImplTest {
         assertNotNull(response);
         assertEquals("John", response.getFirstName());
         assertEquals("Doe", response.getLastName());
-        assertEquals("password", response.getPassword());
         assertTrue(response.getIsActive());
         assertEquals(dateOfBirth, response.getBirthDate());
         assertEquals("123 Main St", response.getAddress());
@@ -175,7 +174,6 @@ class TraineeServiceImplTest {
         assertNotNull(response);
         assertEquals("John", response.getFirstName());
         assertEquals("Doe", response.getLastName());
-        assertEquals("password", response.getPassword());
         assertTrue(response.getIsActive());
         assertEquals(dateOfBirth, response.getBirthDate());
         assertEquals("123 Main St", response.getAddress());

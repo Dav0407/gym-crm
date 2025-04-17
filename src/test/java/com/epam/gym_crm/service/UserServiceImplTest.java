@@ -9,6 +9,7 @@ import com.epam.gym_crm.exception.InvalidPasswordException;
 import com.epam.gym_crm.exception.UserNotFoundException;
 import com.epam.gym_crm.mapper.UserMapper;
 import com.epam.gym_crm.repository.UserRepository;
+import com.epam.gym_crm.service.impl.BruteForceProtectorService;
 import com.epam.gym_crm.service.impl.UserServiceImpl;
 import org.hibernate.service.spi.ServiceException;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
+
+    @Mock
+    private BruteForceProtectorService bruteForceProtectorService;
 
     @Mock
     private JwtService jwtService;

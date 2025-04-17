@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -62,7 +62,7 @@ class GlobalExceptionHandlerTest {
                 .build();
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/users/login")
+        MvcResult result = mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
@@ -88,7 +88,7 @@ class GlobalExceptionHandlerTest {
                 .build();
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/users/login")
+        MvcResult result = mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
@@ -146,7 +146,7 @@ class GlobalExceptionHandlerTest {
                 .thenThrow(new InvalidUserCredentialException("Invalid credentials"));
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/users/login")
+        MvcResult result = mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isNotFound())
@@ -204,7 +204,7 @@ class GlobalExceptionHandlerTest {
                 .thenThrow(new UserNotFoundException("User not found"));
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/users/login")
+        MvcResult result = mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isNotFound())
@@ -231,7 +231,7 @@ class GlobalExceptionHandlerTest {
                 .thenThrow(new RuntimeException("Something went wrong"));
 
         // When
-        MvcResult result = mockMvc.perform(get("/api/v1/users/login")
+        MvcResult result = mockMvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isInternalServerError())

@@ -43,7 +43,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid username or password", content = @Content),
             @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content)
     })
-    @GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AuthenticationResponseDTO> logIn(@Valid @RequestBody
                                                            @Parameter(description = "User login credentials (username and password)", required = true)
                                                            LogInRequestDTO request) {

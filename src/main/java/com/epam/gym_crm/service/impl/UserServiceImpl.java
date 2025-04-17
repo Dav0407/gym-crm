@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final BruteForceProtectorService protectorService;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -147,6 +149,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public AuthenticationResponseDTO login(LogInRequestDTO request) {
 
+        if (protectorService.isBlocked(request.getUsername())) {
+            throw new LockedException("Too many failed login attempts. Try again after 5 minutes.");
+        }
+
         try { // Here the spring manages the username and password match check and returns a user, so I do not need to use repository
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -161,12 +167,14 @@ public class UserServiceImpl implements UserService {
             UserResponseDTO userResponseDTO = userMapper.toUserResponseDTO(user);
             userResponseDTO.setPassword(getPlainPassword(request.getUsername()));
 
+            protectorService.loginSucceeded(request.getUsername());
             return AuthenticationResponseDTO.builder()
                     .accessToken(jwtAccessToken)
                     .refreshToken(jwtRefreshToken)
                     .user(userResponseDTO)
                     .build();
         } catch (Exception exception) {
+            protectorService.loginFailed(request.getUsername());
             log.warn("User with these credentials does not exist");
             throw new UserNotFoundException("Wrong email and/or password");
         }

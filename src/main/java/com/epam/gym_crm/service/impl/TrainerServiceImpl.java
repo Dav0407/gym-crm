@@ -53,6 +53,8 @@ public class TrainerServiceImpl implements TrainerService {
         log.info("Trainer profile created successfully: {}", savedTrainer);
         TrainerResponseDTO response = getTrainerResponseDTO(trainer);
 
+        response.setPassword(userService.getPlainPassword(response.getUsername()));
+
         return addTokensToDTO(savedTrainer, response);
     }
 
@@ -76,7 +78,11 @@ public class TrainerServiceImpl implements TrainerService {
         Trainer trainer = trainerRepository.findByUser_Id(userByUsername.getId())
                 .orElseThrow(() -> new UserNotFoundException("Trainer not found with username: " + userByUsername.getUsername()));
 
-        return trainerMapper.toTrainerProfileResponseDTO(trainer);
+        TrainerProfileResponseDTO trainerProfileResponseDTO = trainerMapper.toTrainerProfileResponseDTO(trainer);
+
+        trainerProfileResponseDTO.setPassword(userService.getPlainPassword(username));
+
+        return trainerProfileResponseDTO;
     }
 
     @Override
@@ -107,7 +113,11 @@ public class TrainerServiceImpl implements TrainerService {
             updateStatus(trainer.getUser().getUsername());
         }
 
-        return trainerMapper.toTrainerProfileResponseDTO(trainer);
+        TrainerProfileResponseDTO trainerProfileResponseDTO = trainerMapper.toTrainerProfileResponseDTO(trainer);
+
+        trainerProfileResponseDTO.setPassword(userService.getPlainPassword(request.getUsername()));
+
+        return trainerProfileResponseDTO;
     }
 
     @Override

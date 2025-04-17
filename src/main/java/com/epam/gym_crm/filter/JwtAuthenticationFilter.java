@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
                 // Validate token and check if blacklisted
-                if (jwtService.isAccessTokenValid(jwtAccessToken, userDetails)) {
+                if (jwtService.isAccessTokenValid(jwtAccessToken, userDetails) || jwtService.isRefreshTokenValid(jwtAccessToken, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities()
                     );

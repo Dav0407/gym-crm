@@ -100,7 +100,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     // Clean up expired tokens from the blacklist periodically
-    @Scheduled(fixedRate = 3600000) // Run every hour
+    @Scheduled(fixedRate = 3600000) // Runs every hour
     public void cleanupExpiredTokens() {
         Date now = new Date();
         blacklistedTokens.entrySet().removeIf(entry -> entry.getValue().before(now));

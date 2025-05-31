@@ -1,6 +1,5 @@
 package com.epam.gym_crm.client;
 
-import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.service.JwtService;
 import feign.RequestInterceptor;
 import lombok.RequiredArgsConstructor;

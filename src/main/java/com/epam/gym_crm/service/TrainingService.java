@@ -13,4 +13,6 @@ public interface TrainingService {
     List<TraineeTrainingResponseDTO> getTraineeTrainings(GetTraineeTrainingsRequestDTO request);
     List<TrainerTrainingResponseDTO> getTrainerTrainings(GetTrainerTrainingsRequestDTO request);
     TrainingResponseDTO addTraining(AddTrainingRequestDTO request);
+
+    void deleteTraining(Long trainingId);
 }

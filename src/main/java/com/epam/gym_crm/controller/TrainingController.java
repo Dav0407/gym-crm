@@ -23,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -102,4 +104,21 @@ public class TrainingController {
         List<TrainingTypeResponseDTO> response = trainingTypeService.getAllTrainingTypes();
         return ResponseEntity.status(HttpStatus.FOUND).body(response);
     }
+
+    @Operation(summary = "Delete a training", description = "Deletes an existing training session by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Training deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid training ID"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid credentials"),
+            @ApiResponse(responseCode = "404", description = "Training not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @DeleteMapping(value = "/{trainingId}")
+    public ResponseEntity<Void> deleteTraining(
+            @Parameter(description = "ID of the training session to delete", required = true)
+            @PathVariable Long trainingId) {
+        trainingService.deleteTraining(trainingId);
+        return ResponseEntity.ok().build();
+    }
+
 }

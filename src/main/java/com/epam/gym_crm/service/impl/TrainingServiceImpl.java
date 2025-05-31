@@ -1,13 +1,17 @@
 package com.epam.gym_crm.service.impl;
 
+import com.epam.gym_crm.client.TrainerWorkingHoursClient;
 import com.epam.gym_crm.dto.request.AddTrainingRequestDTO;
 import com.epam.gym_crm.dto.request.GetTraineeTrainingsRequestDTO;
 import com.epam.gym_crm.dto.request.GetTrainerTrainingsRequestDTO;
+import com.epam.gym_crm.dto.request.TrainerWorkloadRequest;
 import com.epam.gym_crm.dto.response.TraineeTrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerTrainingResponseDTO;
+import com.epam.gym_crm.dto.response.TrainerWorkloadResponse;
 import com.epam.gym_crm.dto.response.TrainingResponseDTO;
 import com.epam.gym_crm.entity.Training;
 import com.epam.gym_crm.entity.TrainingType;
+import com.epam.gym_crm.exception.ResourceNotFoundException;
 import com.epam.gym_crm.mapper.TrainingMapper;
 import com.epam.gym_crm.repository.TrainingRepository;
 import com.epam.gym_crm.service.TraineeService;
@@ -25,6 +29,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TrainingServiceImpl implements TrainingService {
+
+    private final TrainerWorkingHoursClient trainerWorkingHoursClient;
 
     private final TrainingRepository trainingRepository;
 
@@ -125,11 +131,50 @@ public class TrainingServiceImpl implements TrainingService {
         training.setTrainingDuration(request.getTrainingDuration());
         training.setTrainingName(request.getTrainingName());
 
+        TrainerWorkloadRequest trainerWorkloadRequest = trainer.getUser().getIsActive() ? addWorkingHours(training) : deleteWorkingHours(training);
+
+        TrainerWorkloadResponse trainerWorkloadResponse = trainerWorkingHoursClient.computeTrainerHours(trainerWorkloadRequest);
+        log.info("Saved trainer workload: {}", trainerWorkloadResponse);
+
         Training savedTraining = trainingRepository.save(training);
         log.info("Training saved successfully with ID: {}", savedTraining.getId());
 
         traineeTrainerService.createTraineeTrainer(trainee.getUser().getUsername(), trainer.getUser().getUsername());
 
         return trainingMapper.toTrainingResponseDTO(savedTraining);
+    }
+
+    @Override
+    public void deleteTraining(Long trainingId) {
+        Training training = trainingRepository.findById(trainingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Training not found with id: " + trainingId));
+
+        trainerWorkingHoursClient.computeTrainerHours(deleteWorkingHours(training));
+
+        trainingRepository.deleteById(trainingId);
+    }
+
+    private static TrainerWorkloadRequest addWorkingHours(Training training) {
+        return TrainerWorkloadRequest.builder()
+                .trainerUsername(training.getTrainer().getUser().getUsername())
+                .trainerFirstName(training.getTrainer().getUser().getFirstName())
+                .trainerLastName(training.getTrainer().getUser().getLastName())
+                .isActive(training.getTrainer().getUser().getIsActive())
+                .trainingDate(training.getTrainingDate())
+                .trainingDuration(training.getTrainingDuration())
+                .actionType(TrainerWorkloadRequest.ActionType.ADD)
+                .build();
+    }
+
+    private static TrainerWorkloadRequest deleteWorkingHours(Training training) {
+        return TrainerWorkloadRequest.builder()
+                .trainerUsername(training.getTrainer().getUser().getUsername())
+                .trainerFirstName(training.getTrainer().getUser().getFirstName())
+                .trainerLastName(training.getTrainer().getUser().getLastName())
+                .isActive(training.getTrainer().getUser().getIsActive())
+                .trainingDate(training.getTrainingDate())
+                .trainingDuration(training.getTrainingDuration())
+                .actionType(TrainerWorkloadRequest.ActionType.DELETE)
+                .build();
     }
 }

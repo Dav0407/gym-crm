@@ -127,6 +127,11 @@ public class TraineeServiceImpl implements TraineeService {
         return userService;
     }
 
+    @Override
+    public User.Role getRole() {
+        return User.Role.TRAINEE;
+    }
+
     private TraineeResponseDTO getTraineeResponseDTO(Trainee trainee) {
         return traineeMapper.toTraineeResponseDTO(trainee);
     }

@@ -154,6 +154,10 @@ public class TrainerServiceImpl implements TrainerService {
         return userService;
     }
 
+    @Override
+    public User.Role getRole() {
+        return User.Role.TRAINER;
+    }
 
     @Override
     public JwtService getJwtService() {

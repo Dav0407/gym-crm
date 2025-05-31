@@ -11,6 +11,8 @@ public interface UserCreationService {
 
     UserService getUserService();  // To be implemented by services
 
+    User.Role getRole();
+
     default User createUser(String firstName, String lastName) {
         if (!StringUtils.hasText(firstName) || !StringUtils.hasText(lastName)) {
             throw new IllegalArgumentException("First name and last name cannot be empty");
@@ -26,6 +28,7 @@ public interface UserCreationService {
                 .username(username)
                 .password(getUserService().encryptPassword(plainPassword)) //hashing the password using bcrypt
                 .isActive(true)
+                .role(getRole())
                 .build();
 
         user = getUserService().saveUser(user);

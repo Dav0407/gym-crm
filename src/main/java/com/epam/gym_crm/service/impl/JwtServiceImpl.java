@@ -1,5 +1,6 @@
 package com.epam.gym_crm.service.impl;
 
+import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -51,6 +52,7 @@ public class JwtServiceImpl implements JwtService {
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("token_type", "access");// I am adding this extra claim to differentiate access from refresh, so they are not used interchangeably
+        claims.put("role", ((User) userDetails).getRole());
         return buildToken(claims, userDetails, accessTokenExpiration);
     }
 

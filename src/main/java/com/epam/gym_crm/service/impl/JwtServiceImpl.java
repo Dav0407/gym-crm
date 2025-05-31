@@ -52,7 +52,7 @@ public class JwtServiceImpl implements JwtService {
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("token_type", "access");// I am adding this extra claim to differentiate access from refresh, so they are not used interchangeably
-        claims.put("role", ((User) userDetails).getRole());
+        claims.put("role", ((User) userDetails).getRole().toString());
         return buildToken(claims, userDetails, accessTokenExpiration);
     }
 

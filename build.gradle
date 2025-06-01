@@ -77,6 +77,10 @@ dependencies {
     //Prometheus
     runtimeOnly group: 'io.micrometer', name: 'micrometer-registry-prometheus'
 
+    //Logging
+    implementation group: 'ch.qos.logback', name: 'logback-classic'
+    implementation group: 'org.slf4j', name: 'slf4j-api'
+
     //Test
     testImplementation group: 'org.springframework.security', name: 'spring-security-test'
     testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test'

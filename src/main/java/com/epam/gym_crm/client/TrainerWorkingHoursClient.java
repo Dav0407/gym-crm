@@ -1,5 +1,6 @@
 package com.epam.gym_crm.client;
 
+import com.epam.gym_crm.config.FeignClientConfig;
 import com.epam.gym_crm.dto.request.TrainerWorkloadRequest;
 import com.epam.gym_crm.dto.response.TrainerWorkloadResponse;
 import org.springframework.cloud.openfeign.FeignClient;

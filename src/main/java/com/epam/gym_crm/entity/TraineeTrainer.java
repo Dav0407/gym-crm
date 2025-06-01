@@ -27,10 +27,12 @@ public class TraineeTrainer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "trainee_id", nullable = false)
     private Trainee trainee;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "trainer_id", nullable = false)
     private Trainer trainer;

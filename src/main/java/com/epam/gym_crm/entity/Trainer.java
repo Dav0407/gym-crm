@@ -36,10 +36,11 @@ public class Trainer {
     @ManyToOne
     private TrainingType specialization;
 
-    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @ToString.Exclude
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<TraineeTrainer> traineeTrainers;
 
+    @ToString.Exclude
     @OneToOne()
     @JoinColumn(name = "user_id")
     private User user;

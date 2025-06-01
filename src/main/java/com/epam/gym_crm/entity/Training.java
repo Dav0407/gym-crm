@@ -30,10 +30,12 @@ public class Training {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "trainee_id")
     private Trainee trainee;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "trainer_id")
     private Trainer trainer;
@@ -41,6 +43,7 @@ public class Training {
     @Column(nullable = false, name = "training_name")
     private String trainingName;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "training_type_id")
     private TrainingType trainingType;

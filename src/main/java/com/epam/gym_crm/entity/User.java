@@ -55,9 +55,11 @@ public class User implements UserDetails {
     @Column(nullable = false, name = "is_active")
     private Boolean isActive;
 
+    @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Trainee trainee;
 
+    @ToString.Exclude
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Trainer trainer;
 

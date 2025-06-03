@@ -6,6 +6,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 
 @Aspect
@@ -16,11 +17,13 @@ public class OperationLoggingAspect {
 
     @Before("execution(* com.epam.gym_crm..*Service.*(..))")
     public void logBefore(JoinPoint joinPoint) {
-        logger.info("Operation started: {} | Args: {}", joinPoint.getSignature(), joinPoint.getArgs());
+        String transactionId = MDC.get("transactionId");
+        logger.info("[{}] :: Operation started: {} | Args: {}", transactionId, joinPoint.getSignature(), joinPoint.getArgs());
     }
 
     @AfterReturning(pointcut = "execution(* com.epam.gym_crm..*Service.*(..))", returning = "result")
     public void logAfter(JoinPoint joinPoint, Object result) {
-        logger.info("Operation finished: {} | Result: {}", joinPoint.getSignature(), result);
+        String transactionId = MDC.get("transactionId");
+        logger.info("[{}] :: Operation finished: {} | Result: {}", transactionId, joinPoint.getSignature(), result);
     }
 }

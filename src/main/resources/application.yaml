@@ -11,6 +11,10 @@ spring:
       jakarta:
         persistence:
           sql-load-script-source: META-INF/import.sql
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 
 application:
   security:
@@ -42,3 +46,18 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8765/eureka/
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      trainerSessionManagement:
+        registerHealthIndicator: true
+        sliding-window-type: count_based
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        slow-call-duration-threshold: 2s
+        slow-call-rate-threshold: 50
+        permittedNumberOfCallsInHalfOpenState: 2
+        automaticTransitionFromOpenToHalfOpenEnabled: true

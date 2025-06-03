@@ -39,6 +39,9 @@ dependencies {
     //Open Feign
     implementation group: 'org.springframework.cloud', name:'spring-cloud-starter-openfeign'
 
+    //Circuit Breaker
+    implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-circuitbreaker-resilience4j'
+
     //Spring-Web
     implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
 
@@ -76,10 +79,6 @@ dependencies {
 
     //Prometheus
     runtimeOnly group: 'io.micrometer', name: 'micrometer-registry-prometheus'
-
-    //Logging
-    implementation group: 'ch.qos.logback', name: 'logback-classic'
-    implementation group: 'org.slf4j', name: 'slf4j-api'
 
     //Test
     testImplementation group: 'org.springframework.security', name: 'spring-security-test'

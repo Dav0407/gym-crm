@@ -1,8 +1,8 @@
 package com.epam.gym_crm.config;
 
+import com.epam.gym_crm.logging_context.TransactionContext;
 import com.epam.gym_crm.service.JwtService;
 import feign.RequestInterceptor;
-import org.slf4j.MDC;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class FeignClientConfig {
 
     private final JwtService jwtService;
+    private final TransactionContext transactionContext;
 
     @Bean
     public RequestInterceptor requestInterceptor() {
@@ -26,7 +27,7 @@ public class FeignClientConfig {
             template.header("Authorization", "Bearer " + accessToken);
 
             // Set Transaction ID Header
-            String transactionId = MDC.get("transactionId");
+            String transactionId = transactionContext.getTransactionId();
             if (transactionId != null) {
                 template.header("X-Transaction-Id", transactionId);
             }

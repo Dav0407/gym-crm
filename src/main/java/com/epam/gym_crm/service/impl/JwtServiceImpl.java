@@ -51,8 +51,14 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public String generateAccessToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("token_type", "access");// I am adding this extra claim to differentiate access from refresh, so they are not used interchangeably
-        claims.put("role", ((User) userDetails).getRole().toString());
+        claims.put("token_type", "access");
+
+        if (userDetails instanceof User) {
+            claims.put("role", ((User) userDetails).getRole().toString());
+        } else {
+            claims.put("role", "ROLE_USER");
+        }
+
         return buildToken(claims, userDetails, accessTokenExpiration);
     }
 
@@ -108,7 +114,7 @@ public class JwtServiceImpl implements JwtService {
         blacklistedTokens.entrySet().removeIf(entry -> entry.getValue().before(now));
     }
 
-    private boolean isTokenNotExpired(String token) {
+    public boolean isTokenNotExpired(String token) {
         return !extractExpiration(token).before(new Date());
     }
 
@@ -137,7 +143,7 @@ public class JwtServiceImpl implements JwtService {
         return blacklistedTokens.containsKey(token);
     }
 
-    private Claims extractAllClaims(String token) {
+    public Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
                 .verifyWith(getSignInKey())

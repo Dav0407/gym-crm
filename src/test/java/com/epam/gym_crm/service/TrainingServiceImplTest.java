@@ -3,12 +3,14 @@ package com.epam.gym_crm.service;
 import com.epam.gym_crm.dto.request.AddTrainingRequestDTO;
 import com.epam.gym_crm.dto.request.GetTraineeTrainingsRequestDTO;
 import com.epam.gym_crm.dto.request.GetTrainerTrainingsRequestDTO;
+import com.epam.gym_crm.dto.request.TrainerWorkloadRequest;
 import com.epam.gym_crm.dto.response.TraineeProfileResponseDTO;
 import com.epam.gym_crm.dto.response.TraineeResponseDTO;
 import com.epam.gym_crm.dto.response.TraineeTrainingResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerProfileResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerResponseDTO;
 import com.epam.gym_crm.dto.response.TrainerTrainingResponseDTO;
+import com.epam.gym_crm.dto.response.TrainerWorkloadResponse;
 import com.epam.gym_crm.dto.response.TrainingResponseDTO;
 import com.epam.gym_crm.entity.Trainee;
 import com.epam.gym_crm.entity.Trainer;
@@ -17,6 +19,7 @@ import com.epam.gym_crm.entity.TrainingType;
 import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.mapper.TrainingMapper;
 import com.epam.gym_crm.repository.TrainingRepository;
+import com.epam.gym_crm.service.impl.TrainerWorkingHoursServiceImpl;
 import com.epam.gym_crm.service.impl.TrainingServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -64,6 +67,9 @@ class TrainingServiceImplTest {
 
     @InjectMocks
     private TrainingServiceImpl trainingService;
+
+    @Mock
+    private TrainerWorkingHoursServiceImpl trainerWorkingHoursService;
 
     private Trainee trainee;
     private Trainer trainer;
@@ -326,11 +332,42 @@ class TrainingServiceImplTest {
         request.setTrainingDuration(60);
         request.setTrainingName("Test Training");
 
+        // Mock entities
+        Trainee trainee = new Trainee();
+        User traineeUser = new User();
+        traineeUser.setUsername("trainee1");
+        trainee.setUser(traineeUser);
+
+        Trainer trainer = new Trainer();
+        User trainerUser = new User();
+        trainerUser.setUsername("trainer1");
+        trainerUser.setIsActive(true);
+        trainer.setUser(trainerUser);
+
+        TrainingType specialization = new TrainingType();
+        specialization.setTrainingTypeName("Yoga");
+        trainer.setSpecialization(specialization);
+
+        TrainingType trainingType = new TrainingType();
+        trainingType.setTrainingTypeName("Yoga");
+
+        Training training = new Training();
+        training.setTrainingName("Test Training");
+        training.setTrainee(trainee);
+        training.setTrainer(trainer);
+        training.setTrainingType(trainingType);
+
+        TrainingResponseDTO trainingResponseDTO = new TrainingResponseDTO();
+        trainingResponseDTO.setTrainingName("Test Training");
+
+        // Mock service calls
         when(traineeService.getTraineeEntityByUsername("trainee1")).thenReturn(trainee);
         when(trainerService.getTrainerEntityByUsername("trainer1")).thenReturn(trainer);
-        when(trainingTypeService.findByValue(anyString())).thenReturn(Optional.of(trainingType));
+        when(trainingTypeService.findByValue("Yoga")).thenReturn(Optional.of(trainingType));
         when(trainingRepository.save(any(Training.class))).thenReturn(training);
-        when(trainingMapper.toTrainingResponseDTO(any(Training.class))).thenReturn(trainingResponseDTO);
+        when(trainingMapper.toTrainingResponseDTO(training)).thenReturn(trainingResponseDTO);
+        when(trainerWorkingHoursService.computeTrainerHours(any(TrainerWorkloadRequest.class)))
+                .thenReturn(new TrainerWorkloadResponse());
 
         // Act
         TrainingResponseDTO result = trainingService.addTraining(request);
@@ -340,6 +377,7 @@ class TrainingServiceImplTest {
         assertEquals("Test Training", result.getTrainingName());
         verify(trainingRepository).save(any(Training.class));
         verify(traineeTrainerService).createTraineeTrainer("trainee1", "trainer1");
+        verify(trainerWorkingHoursService).computeTrainerHours(any(TrainerWorkloadRequest.class));
     }
 
     @Test

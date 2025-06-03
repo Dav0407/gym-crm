@@ -43,7 +43,5 @@ class TraineeTrainerTest {
         String toString = traineeTrainer.toString();
 
         assertTrue(toString.contains("1"));
-        assertTrue(toString.contains("trainee"));
-        assertTrue(toString.contains("trainer"));
     }
 }

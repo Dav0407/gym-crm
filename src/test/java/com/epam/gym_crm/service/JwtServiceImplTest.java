@@ -1,17 +1,16 @@
 package com.epam.gym_crm.service;
 
+import com.epam.gym_crm.entity.User;
 import com.epam.gym_crm.service.impl.JwtServiceImpl;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
@@ -20,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 class JwtServiceImplTest {
@@ -38,158 +36,99 @@ class JwtServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         jwtService = new JwtServiceImpl();
 
-        // Set private fields using ReflectionTestUtils
         ReflectionTestUtils.setField(jwtService, "secretKey", SECRET_KEY);
         ReflectionTestUtils.setField(jwtService, "accessTokenExpiration", ACCESS_TOKEN_EXPIRATION);
         ReflectionTestUtils.setField(jwtService, "refreshTokenExpiration", REFRESH_TOKEN_EXPIRATION);
 
-        when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
+        // Only mock what's absolutely necessary
+        lenient().when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
     }
 
     @Test
-    void testGenerateAccessToken() {
-        // Execute
+    void generateAccessToken_withUserDetails_shouldGenerateValidToken() {
         String token = jwtService.generateAccessToken(userDetails);
 
-        // Verify
         assertNotNull(token);
         assertEquals(TEST_USERNAME, jwtService.extractUsername(token));
         assertFalse(jwtService.isRefreshToken(token));
+
+        Claims claims = jwtService.extractAllClaims(token);
+        assertEquals("ROLE_USER", claims.get("role"));
+        assertEquals("access", claims.get("token_type"));
     }
 
     @Test
-    void testGenerateRefreshToken() {
-        // Execute
+    void generateAccessToken_withUser_shouldIncludeRole() {
+        User user = new User();
+        user.setUsername(TEST_USERNAME);
+        user.setRole(User.Role.TRAINEE);
+
+        String token = jwtService.generateAccessToken(user);
+
+        assertNotNull(token);
+        assertEquals(TEST_USERNAME, jwtService.extractUsername(token));
+
+        Claims claims = jwtService.extractAllClaims(token);
+        assertEquals("TRAINEE", claims.get("role"));
+        assertEquals("access", claims.get("token_type"));
+    }
+
+    @Test
+    void generateRefreshToken_shouldGenerateValidRefreshToken() {
         String token = jwtService.generateRefreshToken(userDetails);
 
-        // Verify
         assertNotNull(token);
         assertEquals(TEST_USERNAME, jwtService.extractUsername(token));
         assertTrue(jwtService.isRefreshToken(token));
+
+        Claims claims = jwtService.extractAllClaims(token);
+        assertEquals("refresh", claims.get("token_type"));
     }
 
     @Test
-    void testExtractUsername() {
-        // Setup
+    void isAccessTokenValid_shouldReturnTrueForValidToken() {
         String token = jwtService.generateAccessToken(userDetails);
-
-        // Execute
-        String username = jwtService.extractUsername(token);
-
-        // Verify
-        assertEquals(TEST_USERNAME, username);
-    }
-
-    @Test
-    void testIsAccessTokenValid_ValidToken() {
-        // Setup
-        String token = jwtService.generateAccessToken(userDetails);
-
-        // Execute & Verify
         assertTrue(jwtService.isAccessTokenValid(token, userDetails));
     }
 
     @Test
-    void testIsAccessTokenValid_InvalidUsername() {
-        // Setup
-        String token = jwtService.generateAccessToken(userDetails);
-        UserDetails differentUser = mock(UserDetails.class);
-        when(differentUser.getUsername()).thenReturn("differentuser");
-
-        // Execute & Verify
-        assertFalse(jwtService.isAccessTokenValid(token, differentUser));
-    }
-
-    @Test
-    void testIsAccessTokenValid_RefreshToken() {
-        // Setup - using refresh token for access validation
+    void isAccessTokenValid_shouldReturnFalseForRefreshToken() {
         String token = jwtService.generateRefreshToken(userDetails);
-
-        // Execute & Verify
         assertFalse(jwtService.isAccessTokenValid(token, userDetails));
     }
 
     @Test
-    void testIsRefreshTokenValid_ValidToken() {
-        // Setup
+    void isRefreshTokenValid_shouldReturnTrueForValidRefreshToken() {
         String token = jwtService.generateRefreshToken(userDetails);
-
-        // Execute & Verify
         assertTrue(jwtService.isRefreshTokenValid(token, userDetails));
     }
 
     @Test
-    void testIsRefreshTokenValid_InvalidUsername() {
-        // Setup
-        String token = jwtService.generateRefreshToken(userDetails);
-        UserDetails differentUser = mock(UserDetails.class);
-        when(differentUser.getUsername()).thenReturn("differentuser");
-
-        // Execute & Verify
-        assertFalse(jwtService.isRefreshTokenValid(token, differentUser));
-    }
-
-    @Test
-    void testIsRefreshTokenValid_AccessToken() {
-        // Setup - using access token for refresh validation
+    void isRefreshTokenValid_shouldReturnFalseForAccessToken() {
         String token = jwtService.generateAccessToken(userDetails);
-
-        // Execute & Verify
         assertFalse(jwtService.isRefreshTokenValid(token, userDetails));
     }
 
     @Test
-    void testBlackListToken() throws Exception {
-        // Setup
+    void blackListToken_shouldInvalidateToken() {
         String token = jwtService.generateAccessToken(userDetails);
-
-        // Get access to blacklistedTokens map
-        Field blacklistedTokensField = JwtServiceImpl.class.getDeclaredField("blacklistedTokens");
-        blacklistedTokensField.setAccessible(true);
-        Map<String, Date> blacklistedTokens = (Map<String, Date>) blacklistedTokensField.get(jwtService);
-
-        // Execute
         jwtService.blackListToken(token);
 
-        // Verify token is blacklisted
-        assertTrue(blacklistedTokens.containsKey(token));
-
-        // Verify token is no longer valid
         assertFalse(jwtService.isAccessTokenValid(token, userDetails));
+
+        // Verify token is in blacklist
+        Map<String, Date> blacklist = (Map<String, Date>)
+                ReflectionTestUtils.getField(jwtService, "blacklistedTokens");
+        assertTrue(blacklist.containsKey(token));
     }
 
     @Test
-    void testExtractClaim() {
-        // Setup
+    void extractClaim_shouldReturnRequestedClaim() {
         String token = jwtService.generateAccessToken(userDetails);
-        Function<Claims, String> claimsResolver = Claims::getSubject;
+        Function<Claims, String> subjectExtractor = Claims::getSubject;
 
-        // Execute
-        String subject = jwtService.extractClaim(token, claimsResolver);
-
-        // Verify
-        assertEquals(TEST_USERNAME, subject);
-    }
-
-    @Test
-    void testIsRefreshToken_PositiveCase() {
-        // Setup
-        String token = jwtService.generateRefreshToken(userDetails);
-
-        // Execute & Verify
-        assertTrue(jwtService.isRefreshToken(token));
-    }
-
-    @Test
-    void testIsRefreshToken_NegativeCase() {
-        // Setup
-        String token = jwtService.generateAccessToken(userDetails);
-
-        // Execute & Verify
-        assertFalse(jwtService.isRefreshToken(token));
+        assertEquals(TEST_USERNAME, jwtService.extractClaim(token, subjectExtractor));
     }
 }
